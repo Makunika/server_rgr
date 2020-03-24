@@ -8,12 +8,13 @@ public class Client implements Runnable {
 	private Socket client;
 	private Socket data_socket;
 	private DataInputStream in;
-	private PrintWriter out;
+	private DataOutputStream out;
 
 	Client(Socket socket)
 	{
 		client = socket;
 	}
+
 	@Override
 	public void run() {
 		try{
@@ -22,7 +23,7 @@ public class Client implements Runnable {
 			in = new DataInputStream(client.getInputStream());
 
 			//Выходной поток сервера
-			out = new PrintWriter(client.getOutputStream(),true);
+			out = new DataOutputStream(client.getOutputStream());
 			BufferedReader bRead = new BufferedReader(new InputStreamReader(System.in));
 
 			int count = 5;
@@ -31,11 +32,13 @@ public class Client implements Runnable {
 
 
 			if (entry.equalsIgnoreCase("yes")) {
-				out.write("Connection on");
-				//out.flush();
+				System.out.println("Send");
+				out.writeUTF("Connection on");
+				out.flush();
+				System.out.println("Send ok");
 			} else if (entry.equalsIgnoreCase("count")) {
-				out.write(Integer.toString(count));
-				//out.flush();
+				out.writeUTF(Integer.toString(count));
+				out.flush();
 				count++;
 				System.out.println("Send" + count);
 			}
@@ -49,6 +52,7 @@ public class Client implements Runnable {
 			in.close();
 			out.close();
 			client.close();
+			System.out.println("Close Connection " + ServerMain.numberOfOnline);
 			ServerMain.numberOfOnline--;
 		}
 		catch (IOException ex)

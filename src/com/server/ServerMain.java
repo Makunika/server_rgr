@@ -15,19 +15,20 @@ public class ServerMain {
 
 	public static void main(String[] args) throws IOException {
 		
-		Sql_service x =new Sql_service();
-		System.out.print(x.Registration("Maks", "KEK"));
+		//Sql_service x =new Sql_service();
+		//System.out.print(x.Registration("Maks", "KEK"));
 		Socket client = null;
 		ServerSocket serverSocket = null;
 		try {
 			try {
 				serverSocket = new ServerSocket(PORT1);
-				System.out.println("Waiting...");
+
 				while (true) {
+					System.out.println("Waiting...");
 					client = serverSocket.accept();
 					numberOfOnline++;
 					System.out.println("One more clients has been connected");
-					System.out.println("The are " + numberOfOnline + "clients online");
+					System.out.println("The are " + numberOfOnline + " clients online");
 					Runnable r = new Client(client);
 					Thread t =  new Thread(r);
 					t.start();
