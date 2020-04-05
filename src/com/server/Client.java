@@ -75,6 +75,7 @@ public class Client implements Runnable {
 			in.close();
 			out.close();
 			client.close();
+			System.out.println("Close Connection " + ServerMain.numberOfOnline);
 			ServerMain.numberOfOnline--;
 		}
 		catch (IOException ex)

@@ -21,6 +21,7 @@ public class ServerMain {
 				serverSocket = new ServerSocket(PORT1);
 				System.out.println("Waiting...");
 				while (true) {
+					System.out.println("Waiting...");
 					client = serverSocket.accept();
 					numberOfOnline++;
 					System.out.println("One more clients has been connected");
