@@ -13,10 +13,7 @@ public class ServerMain {
 	public static int numberOfOnline = 0;
 
 
-	public static void main(String[] args) throws IOException {
-		
-		Sql_service x =new Sql_service();
-		System.out.print(x.Registration("Maks", "KEK"));
+	public static void main(String[] args) {
 		Socket client = null;
 		ServerSocket serverSocket = null;
 		try {
@@ -27,7 +24,7 @@ public class ServerMain {
 					client = serverSocket.accept();
 					numberOfOnline++;
 					System.out.println("One more clients has been connected");
-					System.out.println("The are " + numberOfOnline + "clients online");
+					System.out.println("The are " + numberOfOnline + " clients online");
 					Runnable r = new Client(client);
 					Thread t =  new Thread(r);
 					t.start();

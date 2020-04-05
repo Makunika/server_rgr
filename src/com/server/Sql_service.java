@@ -1,108 +1,125 @@
 package com.server;
 
-import java.net.*;
 import java.sql.*;
-import java.io.*;
+import com.server.Codes.*;
+
 public class Sql_service {
 	private static final String sql_url = "jdbc:mysql://localhost/users?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 	private static final String sql_login = "root";
-	private static final String sql_password = "Root_password";
+	private static final String sql_password = "12345"; //Root_password
 	private String query;
-	ErrorCodes a;
-	private Connection conn;
+	private Connection connection;
 	private Statement state;
 	private ResultSet result;
-	int Connect()
+
+	private void Connect() throws SQLException
+	{
+		if(connection == null || !connection.isValid(1))
+			connection = DriverManager.getConnection(sql_url, sql_login, sql_password);
+	}
+
+	private void OpenChancels() throws SQLException
+	{
+		state =  connection.createStatement();
+		result = state.executeQuery(query);
+	}
+	private void CloseConnection()
 	{
 		try {
-			conn = DriverManager.getConnection(sql_url, sql_login, sql_password);
-		return 0;
+			connection.close();
+			state.close();
+			result.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return 1;
 		}
+
 	}
-	int OpenChanells() throws SQLException
-	{
-		state =  conn.createStatement();
-		result=state.executeQuery(query);
-		return 0;
-	}
-	int CloseConnection()
-	{
-		return 0;
-	}
-	
-	int Registration(String login,String password)
+
+	public CodeSql Registration(String login, String password)
 	{
 		try {
-		if(conn==null)
-		{
-			if(Connect()==0);
-				else return 1;
-		} else
-			if(!conn.isValid(1))
-					if(Connect()==0);
-						else return 1;
+			Connect();
 		}
-		catch(SQLException e1){
-			return 101;//Connection error
+		catch(SQLException e){
+			e.printStackTrace();
+			return CodeSql.BadSqlConnection;
 		}
 		
 		try {
-		query = "SELECT * FROM clients"
-				+ " WHERE LOGIN = '" + login+ "';";
-		OpenChanells();
+		query = "SELECT * FROM users"
+				+ " WHERE LOGIN = '" + login + "';";
+		OpenChancels();
 			if(!result.isBeforeFirst())
 			{
-				query="INSERT clients(login,password) VALUES ('"+login+"','"+password+"');";
+				query="INSERT users(login,password, storage_all, storage_fill) VALUES ('"+login+"','"+password+"','27','25');";
 				state.executeUpdate(query);
 			}
-			else return -1;//��� ���� ������������
+			else return CodeSql.Bad;
 		}
 		catch(SQLException e1){
-			//slomalos
+			e1.printStackTrace();
 		}
 		finally {
 			CloseConnection();
 		}
-		return 0;
+		return CodeSql.OkRegistration;
 	}
-	int Authorization(String login,String password)
+
+	public CodeSql Authorization(String login, String password)
 	{
-		if(conn==null)
-		{
-			if(Connect()==0);
-				else return 1;
-		} else
-			try {
-				if(!conn.isValid(1))
-					if(Connect()==0);
-						else return 1;
-			} catch (SQLException e1) {}
+		/*try {
+			Connect();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+			return CodeSql.BadSqlConnection;
+		}
+		query = "SELECT * FROM users"
+				+ " WHERE LOGIN = '" + login + "';"
+				+ " WHERE PASSWORD = '" + password + "';";
+
 		try {
-			state =  conn.createStatement();
+			state = connection.createStatement();
 			result=state.executeQuery(query);
 			if(result.isBeforeFirst())
 			{
-				conn.close();
-				state.close();
-				result.close();
-				return 0;
+				return CodeSql.OkAuthorization;
 			}
-			else return 3;
+			else return CodeSql.BadAuthorization;
 		} catch (SQLException e) { }
 		finally
 		{
-			try {
-				conn.close();
-				state.close();
-				result.close();
-			} catch (SQLException e) {
-				return 5;
-			}
+			CloseConnection();
 		}
-		return 0;
+		return CodeSql.OkAuthorization;*/
+		try {
+			Connect();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+			return CodeSql.BadSqlConnection;
+		}
+
+		try {
+			query = "SELECT * FROM users"
+					+ " WHERE LOGIN = '" + login + "';"
+					+ " WHERE PASSWORD = '" + password + "';";
+			OpenChancels();
+			if(!result.isBeforeFirst())
+			{
+				//query="INSERT users(login,password, storage_all, storage_fill) VALUES ('"+login+"','"+password+"','27','25');";
+				//state.executeUpdate(query);
+			}
+			else return CodeSql.Bad;
+		}
+		catch(SQLException e1){
+			e1.printStackTrace();
+		}
+		finally {
+			CloseConnection();
+		}
+		return CodeSql.OkRegistration;
+
 	}
 	
 }
