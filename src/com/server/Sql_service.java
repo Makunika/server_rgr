@@ -67,7 +67,7 @@ public class Sql_service {
 
 	public CodeSql Authorization(String login, String password)
 	{
-		/*try {
+		try {
 			Connect();
 		}
 		catch(SQLException e){
@@ -75,8 +75,8 @@ public class Sql_service {
 			return CodeSql.BadSqlConnection;
 		}
 		query = "SELECT * FROM users"
-				+ " WHERE LOGIN = '" + login + "';"
-				+ " WHERE PASSWORD = '" + password + "';";
+				+ " WHERE LOGIN = '" + login + "' AND "
+				+ "PASSWORD = '" + password + "';";
 
 		try {
 			state = connection.createStatement();
@@ -91,34 +91,7 @@ public class Sql_service {
 		{
 			CloseConnection();
 		}
-		return CodeSql.OkAuthorization;*/
-		try {
-			Connect();
-		}
-		catch(SQLException e){
-			e.printStackTrace();
-			return CodeSql.BadSqlConnection;
-		}
-
-		try {
-			query = "SELECT * FROM users"
-					+ " WHERE LOGIN = '" + login + "';"
-					+ " WHERE PASSWORD = '" + password + "';";
-			OpenChancels();
-			if(!result.isBeforeFirst())
-			{
-				//query="INSERT users(login,password, storage_all, storage_fill) VALUES ('"+login+"','"+password+"','27','25');";
-				//state.executeUpdate(query);
-			}
-			else return CodeSql.Bad;
-		}
-		catch(SQLException e1){
-			e1.printStackTrace();
-		}
-		finally {
-			CloseConnection();
-		}
-		return CodeSql.OkRegistration;
+		return CodeSql.OkAuthorization;
 
 	}
 	
