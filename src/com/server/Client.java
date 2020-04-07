@@ -1,7 +1,6 @@
 package com.server;
 
 import java.net.*;
-import java.util.LinkedList;
 import java.io.*;
 import java.util.regex.Pattern;
 
@@ -40,29 +39,44 @@ public class Client implements Runnable {
 			{
 				case 100:
 				{
-					if (sqlService.Registration(entryClient.login,entryClient.password) != Codes.CodeSql.OkRegistration)
+					if (sqlService.registration(entryClient.login,entryClient.password) != Codes.CodeSql.OkRegistration)
 					{
 						out.writeUTF(entryClient.out + "Bad Registration " + "://199");
+						System.out.println("out: " + entryClient.out + "Bad Registration " + "://199");
 					}
 					else
 					{
 						out.writeUTF(entryClient.out + "Ok Registration " + "://100");
+						System.out.println("out: " + entryClient.out + "Ok Registration " + "://100");
 					}
 					out.flush();
 					break;
 				}
 				case 101:
 				{
-					if (sqlService.Authorization(entryClient.login,entryClient.password) != Codes.CodeSql.OkAuthorization)
+					if (sqlService.authorization(entryClient.login,entryClient.password) != Codes.CodeSql.OkAuthorization)
 					{
 						out.writeUTF(entryClient.out + "Bad Authorization " + "://199");
+						System.out.println("out: " +entryClient.out + "Bad Authorization " + "://199");
 					}
 					else
 					{
 						out.writeUTF(entryClient.out + "Ok Authorization " + "://100");
+						System.out.println("out: " +entryClient.out + "Ok Authorization " + "://100");
 					}
 					out.flush();
+					break;
 				}
+				//кейсы служебной инфы (сколько места, список файлов)
+				case 200:
+				{
+					Storage storage = sqlService.getStorage(entryClient.login,entryClient.password);
+					out.writeUTF(entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200");
+					System.out.println("out: " + entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200");
+					out.flush();
+					break;
+				}
+
 				default: break;
 			}
 

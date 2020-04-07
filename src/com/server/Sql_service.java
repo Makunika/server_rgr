@@ -35,7 +35,49 @@ public class Sql_service {
 
 	}
 
-	public CodeSql Registration(String login, String password)
+	public Storage getStorage(String login,String password)
+	{
+		try {
+			Connect();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+		}
+		Storage storage = new Storage();
+
+		query = "SELECT storage_all,storage_fill FROM users"
+				+ " WHERE LOGIN = '" + login + "' AND "
+				+ "PASSWORD = '" + password + "';";
+
+		try {
+			state = connection.createStatement();
+			result=state.executeQuery(query);
+			if(result.isBeforeFirst())
+			{
+				result.next();
+				storage.setStorageAll(result.getLong("storage_all"));
+				storage.setStorageFill(result.getLong("storage_fill"));
+			}
+			else
+			{
+				storage.setStorageAll(0);
+				storage.setStorageFill(0);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally
+		{
+			CloseConnection();
+		}
+
+
+		return storage;
+	}
+
+
+
+	public CodeSql registration(String login, String password)
 	{
 		try {
 			Connect();
@@ -51,7 +93,7 @@ public class Sql_service {
 		OpenChancels();
 			if(!result.isBeforeFirst())
 			{
-				query="INSERT users(login,password, storage_all, storage_fill) VALUES ('"+login+"','"+password+"','27','25');";
+				query="INSERT users(login,password, storage_all, storage_fill) VALUES ('"+login+"','"+password+"','16106127360','0');";
 				state.executeUpdate(query);
 			}
 			else return CodeSql.Bad;
@@ -65,7 +107,7 @@ public class Sql_service {
 		return CodeSql.OkRegistration;
 	}
 
-	public CodeSql Authorization(String login, String password)
+	public CodeSql authorization(String login, String password)
 	{
 		try {
 			Connect();
