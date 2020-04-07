@@ -27,27 +27,27 @@ public class Client implements Runnable {
 
 			int count = 5;
 			String entry = in.readUTF();
-			System.out.println(entry);
+			System.out.println("in " + ServerMain.numberOfOnline + " :" + entry);
 
 			StringsClient entryClient = ParseRequest(entry);
 
 			Sql_service sqlService = new Sql_service();
 
 
-
+			String strOut = "bad";
 			switch (entryClient.code)
 			{
 				case 100:
 				{
 					if (sqlService.registration(entryClient.login,entryClient.password) != Codes.CodeSql.OkRegistration)
 					{
+						strOut = entryClient.out + "Bad Registration " + "://199";
 						out.writeUTF(entryClient.out + "Bad Registration " + "://199");
-						System.out.println("out: " + entryClient.out + "Bad Registration " + "://199");
 					}
 					else
 					{
+						strOut = entryClient.out + "Ok Registration " + "://100";
 						out.writeUTF(entryClient.out + "Ok Registration " + "://100");
-						System.out.println("out: " + entryClient.out + "Ok Registration " + "://100");
 					}
 					out.flush();
 					break;
@@ -56,13 +56,13 @@ public class Client implements Runnable {
 				{
 					if (sqlService.authorization(entryClient.login,entryClient.password) != Codes.CodeSql.OkAuthorization)
 					{
+						strOut = entryClient.out + "Bad Authorization " + "://199";
 						out.writeUTF(entryClient.out + "Bad Authorization " + "://199");
-						System.out.println("out: " +entryClient.out + "Bad Authorization " + "://199");
 					}
 					else
 					{
+						strOut = entryClient.out + "Ok Authorization " + "://100";
 						out.writeUTF(entryClient.out + "Ok Authorization " + "://100");
-						System.out.println("out: " +entryClient.out + "Ok Authorization " + "://100");
 					}
 					out.flush();
 					break;
@@ -70,15 +70,18 @@ public class Client implements Runnable {
 				//кейсы служебной инфы (сколько места, список файлов)
 				case 200:
 				{
+
 					Storage storage = sqlService.getStorage(entryClient.login,entryClient.password);
+					strOut = entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200";
 					out.writeUTF(entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200");
-					System.out.println("out: " + entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200");
 					out.flush();
 					break;
 				}
 
 				default: break;
 			}
+
+			System.out.println("out " + ServerMain.numberOfOnline + " :" + strOut);
 
 		}
 		catch (IOException ex)
