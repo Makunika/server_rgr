@@ -39,7 +39,7 @@ public class Client implements Runnable {
 			{
 				case 100:
 				{
-					if (sqlService.registration(entryClient.login,entryClient.password) != Codes.CodeSql.OkRegistration)
+					if (sqlService.registration(entryClient.login,entryClient.password, entryClient.url) != Codes.CodeSql.OkRegistration)
 					{
 						strOut = entryClient.out + "Bad Registration " + "://199";
 						out.writeUTF(entryClient.out + "Bad Registration " + "://199");
