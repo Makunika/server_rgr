@@ -11,8 +11,7 @@ public class Client implements Runnable {
 	private DataInputStream in;
 	private DataOutputStream out;
 
-	Client(Socket socket)
-	{
+	Client(Socket socket) {
 		client = socket;
 	}
 	@Override
@@ -39,13 +38,11 @@ public class Client implements Runnable {
 			{
 				case 100:
 				{
-					if (sqlService.registration(entryClient.login,entryClient.password) != Codes.CodeSql.OkRegistration)
-					{
+					if (sqlService.registration(entryClient.login,entryClient.password) != Codes.CodeSql.OkRegistration) {
 						strOut = entryClient.out + "Bad Registration " + "://199";
 						out.writeUTF(entryClient.out + "Bad Registration " + "://199");
 					}
-					else
-					{
+					else {
 						strOut = entryClient.out + "Ok Registration " + "://100";
 						out.writeUTF(entryClient.out + "Ok Registration " + "://100");
 					}
@@ -54,13 +51,11 @@ public class Client implements Runnable {
 				}
 				case 101:
 				{
-					if (sqlService.authorization(entryClient.login,entryClient.password) != Codes.CodeSql.OkAuthorization)
-					{
+					if (sqlService.authorization(entryClient.login,entryClient.password) != Codes.CodeSql.OkAuthorization) {
 						strOut = entryClient.out + "Bad Authorization " + "://199";
 						out.writeUTF(entryClient.out + "Bad Authorization " + "://199");
 					}
-					else
-					{
+					else {
 						strOut = entryClient.out + "Ok Authorization " + "://100";
 						out.writeUTF(entryClient.out + "Ok Authorization " + "://100");
 					}
@@ -70,7 +65,6 @@ public class Client implements Runnable {
 				//кейсы служебной инфы (сколько места, список файлов)
 				case 200:
 				{
-
 					Storage storage = sqlService.getStorage(entryClient.login,entryClient.password);
 					strOut = entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200";
 					out.writeUTF(entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200");
@@ -80,10 +74,9 @@ public class Client implements Runnable {
 
 				default: break;
 			}
-
 			System.out.println("out " + ServerMain.numberOfOnline + " :" + strOut);
-
 		}
+
 		catch (IOException ex)
 		{
 			ex.printStackTrace();
@@ -101,6 +94,7 @@ public class Client implements Runnable {
 		}
 		
 	}
+
 	public StringsClient ParseRequest(String entry) throws IOException
 	{
 		StringsClient stringsClient = new StringsClient();
@@ -124,10 +118,6 @@ public class Client implements Runnable {
 
 		return stringsClient;
 	}
-
-
-
-
 	public class StringsClient
 	{
 		public String login;

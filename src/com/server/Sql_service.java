@@ -23,6 +23,7 @@ public class Sql_service {
 		state =  connection.createStatement();
 		result = state.executeQuery(query);
 	}
+
 	private void CloseConnection()
 	{
 		try {
@@ -93,7 +94,7 @@ public class Sql_service {
 		OpenChancels();
 			if(!result.isBeforeFirst())
 			{
-				query="INSERT users(login,password, storage_all, storage_fill) VALUES ('"+login+"','"+password+"','16106127360','0');";
+				query="INSERT users(login,password, storage_all, storage_fill,email) VALUES ('"+login+"','"+password+"','16106127360','0','nuull');";
 				state.executeUpdate(query);
 			}
 			else return CodeSql.Bad;

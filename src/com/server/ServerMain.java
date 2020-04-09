@@ -8,8 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ServerMain {
-	public static int PORT1 = 24571;
-	public static int PORT2 = 24570;
+	public static final int PORT1 = 24571;
+	public static final int PORT2 = 24570;
 	public static int numberOfOnline = 0;
 
 
