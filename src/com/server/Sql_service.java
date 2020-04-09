@@ -92,8 +92,7 @@ public class Sql_service {
 		query = "SELECT * FROM users"
 				+ " WHERE LOGIN = '" + login + "';";
 		OpenChancels();
-			if(!result.isBeforeFirst())
-			{
+			if(!result.isBeforeFirst()) {
 				query="INSERT users(login,password, storage_all, storage_fill,email) VALUES ('"+login+"','"+password+"','16106127360','0','nuull');";
 				state.executeUpdate(query);
 			}
