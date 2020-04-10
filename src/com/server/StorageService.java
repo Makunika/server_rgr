@@ -6,10 +6,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
+
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class StorageService {
+
     static final Path SERVER_ROOT= Paths.get("D:\\LAB BLa\\!server");
 
     private long storageAll=15360;
@@ -71,8 +73,12 @@ public class StorageService {
      * @param name
      * @throws IOException
      */
-    void AddCatalog(String path,String name) throws IOException {
-        Files.createDirectory(Paths.get(path+"//" + name));
+    void AddCatalog(String path,String name) {
+        try {
+            Files.createDirectory(Paths.get(path+"//" + name));
+        } catch (IOException e) {
+           // System.out.println("Already exist");
+        }
     }
 
     /**
@@ -102,9 +108,15 @@ public class StorageService {
      * @param path
      * @param newName
      */
-    void Rename(String path,String newName){
-        Path oldPath=Paths.get(path);
-        Relocate(path,oldPath.getParent().toString()+"//"+newName);
+    public void Rename(String path,String newName){
+       Path f=Paths.get(path);
+       Path rf=Paths.get(f.getParent()+"\\"+newName);
+        try {
+            Files.move(f,rf,REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
