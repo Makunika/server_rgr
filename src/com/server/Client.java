@@ -24,17 +24,16 @@ public class Client implements Runnable {
 			//Выходной поток сервера
 			out = new DataOutputStream(client.getOutputStream());
 
-			int count = 5;
-			String entry = in.readUTF();
-			System.out.println("in " + ServerMain.numberOfOnline + " :" + entry);
+			String request = in.readUTF();
+			System.out.println("in " + ServerMain.numberOfOnline + " :" + request);
 
-			StringsClient entryClient = ParseRequest(entry);
+			ParsedRequest parsedRequest = new ParsedRequest(request);
 
 			Sql_service sqlService = new Sql_service();
 
 
 			String strOut = "bad";
-			switch (entryClient.code)
+			switch (parsedRequest.getCode())
 			{
 				case 100:
 				{
@@ -43,21 +42,21 @@ public class Client implements Runnable {
 						out.writeUTF(entryClient.out + "Bad Registration " + "://199");
 					}
 					else {
-						strOut = entryClient.out + "Ok Registration " + "://100";
-						out.writeUTF(entryClient.out + "Ok Registration " + "://100");
+						strOut = parsedRequest.out + "Ok Registration " + "://100";
+						out.writeUTF(parsedRequest.out + "Ok Registration " + "://100");
 					}
 					out.flush();
 					break;
 				}
 				case 101:
 				{
-					if (sqlService.authorization(entryClient.login,entryClient.password) != Codes.CodeSql.OkAuthorization) {
-						strOut = entryClient.out + "Bad Authorization " + "://199";
-						out.writeUTF(entryClient.out + "Bad Authorization " + "://199");
+					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
+						strOut = parsedRequest.out + "Bad Authorization " + "://199";
+						out.writeUTF(parsedRequest.out + "Bad Authorization " + "://199");
 					}
 					else {
-						strOut = entryClient.out + "Ok Authorization " + "://100";
-						out.writeUTF(entryClient.out + "Ok Authorization " + "://100");
+						strOut = parsedRequest.out + "Ok Authorization " + "://100";
+						out.writeUTF(parsedRequest.out + "Ok Authorization " + "://100");
 					}
 					out.flush();
 					break;
@@ -65,9 +64,9 @@ public class Client implements Runnable {
 				//кейсы служебной инфы (сколько места, список файлов)
 				case 200:
 				{
-					Storage storage = sqlService.getStorage(entryClient.login,entryClient.password);
-					strOut = entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200";
-					out.writeUTF(entryClient.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200");
+					Storage storage = sqlService.getStorage(parsedRequest.getLogin(),parsedRequest.getPassword());
+					strOut = parsedRequest.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200";
+					out.writeUTF(parsedRequest.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200");
 					out.flush();
 					break;
 				}
@@ -95,36 +94,60 @@ public class Client implements Runnable {
 		
 	}
 
-	public StringsClient ParseRequest(String entry) throws IOException
+
+	public class ParsedRequest
 	{
-		StringsClient stringsClient = new StringsClient();
-		Pattern pattern = Pattern.compile("://");
-		String[] strings_all = pattern.split(entry);
-		stringsClient.code = Integer.parseInt(strings_all[2]);
+		private String login;
+		private String password;
+		private String text;
+		private String urlOrData;
+		private int code;
+		private String out;
 
-		pattern = Pattern.compile("/");
+        public ParsedRequest(String request) throws IOException
+        {
+            Pattern pattern = Pattern.compile("://");
+            String[] strings_all = pattern.split(request);
+            code = Integer.parseInt(strings_all[2]);
 
-		String[] string_login_password = pattern.split(strings_all[0]);
-		stringsClient.login = string_login_password[0];
-		stringsClient.password = string_login_password[1];
+            pattern = Pattern.compile("/");
 
-		pattern = Pattern.compile(" /");
+            String[] string_login_password = pattern.split(strings_all[0]);
+            login = string_login_password[0];
+            password = string_login_password[1];
 
-		String[] string_text_url = pattern.split(strings_all[1]);
-		stringsClient.text = string_text_url[0];
-		stringsClient.url = string_text_url[1];
+            pattern = Pattern.compile(" /");
 
-		stringsClient.out = strings_all[0] + "://" + stringsClient.text + "://";
+            String[] string_text_url = pattern.split(strings_all[1]);
+            text = string_text_url[0];
+            urlOrData = string_text_url[1];
 
-		return stringsClient;
-	}
-	public class StringsClient
-	{
-		public String login;
-		public String password;
-		public String text;
-		public String url;
-		public int code;
-		public String out;
-	}
+            out = strings_all[0] + "://" + text + "://";
+
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public String getLogin() {
+            return login;
+        }
+
+        public String getOut() {
+            return out;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public String getUrlOrData() {
+            return urlOrData;
+        }
+    }
 }

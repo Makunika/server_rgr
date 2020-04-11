@@ -78,7 +78,7 @@ public class Sql_service {
 
 
 
-	public CodeSql registration(String login, String password)
+	public CodeSql registration(String login, String password, String email)
 	{
 		try {
 			Connect();
@@ -93,7 +93,7 @@ public class Sql_service {
 				+ " WHERE LOGIN = '" + login + "';";
 		OpenChancels();
 			if(!result.isBeforeFirst()) {
-				query="INSERT users(login,password, storage_all, storage_fill,email) VALUES ('"+login+"','"+password+"','16106127360','0','nuull');";
+				query="INSERT users(login,password, storage_all, storage_fill,email) VALUES ('"+login+"','"+password+"','16106127360','0','"+email+"');";
 				state.executeUpdate(query);
 			}
 			else return CodeSql.Bad;
