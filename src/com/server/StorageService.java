@@ -4,22 +4,26 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 
-
-
+import org.apache.tools.zip.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class StorageService {
-
-    static final Path SERVER_ROOT= Paths.get("D:\\LAB BLa\\!server");
-
+    static final Path SERVER_ROOT= Paths.get("!server");
+    static final String ARCH_PLACE="ARCH_TEMP";
+    static final String SLASH="\\";
     private long storageAll=15360;
     private long storageFill=0;
     private Path root;
+    private String relRoot;
 
-
-
+    public static void main(String[] args) throws Exception {
+        StorageService test=new StorageService("test1");
+       // String path=test.Zip("ZIPTEST","arcch.zip");
+        test.Unzip("D:\\LAB BLa\\server_rgr\\!server\\test1\\arcch.zip","D:\\!test");
+    }
 
     /**
      * Передаем логин
@@ -43,6 +47,7 @@ public class StorageService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        relRoot="!server\\"+Root;
         SendStoreInfo();
     }
 
@@ -94,13 +99,14 @@ public class StorageService {
         }
     }
 
+
     /**
      * Тут мы сразу после входа составим всю инфу о всех файлах и путях а так же занимаемом месте в строку
      *  и вернем в client чтобы отправить пользователю
      *
      */
-    void SendStoreInfo() {
-
+    String SendStoreInfo() {
+        return null;
     }
 
     /**
@@ -116,7 +122,103 @@ public class StorageService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Принимает относительный путь и путь для создания архива
+     * @param sourceDir
+     * @param zipFile
+     * @throws IOException
+     */
+    public String Zip(String sourceDir, String zipFile) throws IOException {
+        FileOutputStream fout=new FileOutputStream(relRoot+"\\"+zipFile);
+        ZipOutputStream zout = new ZipOutputStream(fout);
+
+        //шобы русские работали(не точно)
+        zout.setEncoding("CP866");
+
+        File fileSource = new File(relRoot,sourceDir);
+
+        addDirectory(zout,fileSource);
+
+        zout.close();
+        return relRoot+SLASH+zipFile;
+    }
+
+    private void addDirectory(ZipOutputStream zout, File fileSource) throws IOException {
+        File[] files = fileSource.listFiles();
+        System.out.println("Добавление директории <" + fileSource.getName() + ">");
+        for(int i=0;i<files.length;i++){
+            if(files[i].isDirectory()){
+                addDirectory(zout,files[i]);
+                continue;
+            }
+            System.out.println("Добавление файла <" + files[i].getName() + ">");
+
+            FileInputStream fis =new FileInputStream(files[i]);
+
+            zout.putNextEntry(new ZipEntry(files[i].getPath()));
+
+            byte[] buffer = new byte[4048];
+            int lenght;
+            while((lenght=fis.read(buffer))>0)
+                zout.write(buffer,0,lenght);
+            zout.closeEntry();
+            fis.close();
+        }
+    }
+
+    private void createDir(final String dir)
+    {
+        File file = new File(dir);
+        if (!file.exists())
+            file.mkdirs();
+    }
+    private void createFolder(final String dirName)
+    {
+        if (dirName.endsWith(SLASH))
+            createDir(dirName.substring(0, dirName.length() - 1));
+    }
+    private void checkFolder(final String file_path)
+    {
+        if (!file_path.endsWith(SLASH) && file_path.contains(SLASH)) {
+            String dir = file_path.substring(0, file_path.lastIndexOf(SLASH));
+            createDir(dir);
+        }
+    }
+
+    /**
+     * ПУть АРхива и куда его созать
+     * @param zipDir
+     * @param path
+     * @throws Exception
+     */
+    private void Unzip(String zipDir,String path) throws Exception
+    {
+        ZipFile zipFile = new ZipFile(zipDir, "CP866");
+        Enumeration<?> entries = zipFile.getEntries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = (ZipEntry) entries.nextElement();
+            String entryName = path+SLASH+entry.getName();
+            if (entryName.endsWith(SLASH)) {
+                System.out.println("Создание директории <" + entryName + ">");
+                createFolder (entryName);
+                continue;
+            } else
+                checkFolder(entryName);
+            System.out.println("Чтение файла <" + entryName + ">");
+            InputStream  fis = (InputStream) zipFile.getInputStream(entry);
+
+            FileOutputStream fos = new FileOutputStream(entryName);
+            byte[] buffer = new byte[fis.available()];
+            // Считываем буфер
+            fis.read(buffer, 0, buffer.length);
+            // Записываем из буфера в файл
+            fos.write(buffer, 0, buffer.length);
+            fis.close();
+            fos.close();
+        }
+        zipFile.close() ;
+        System.out.println("Zip файл разархивирован!");
+    }
 }
