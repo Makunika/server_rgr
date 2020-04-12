@@ -19,7 +19,6 @@ public class ServerMain {
 		try {
 			try {
 				serverSocket = new ServerSocket(PORT1);
-				System.out.println("Waiting...");
 				while (true) {
 					System.out.println("Waiting...");
 					client = serverSocket.accept();

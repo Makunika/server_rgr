@@ -90,7 +90,8 @@ public class Sql_service {
 		
 		try {
 		query = "SELECT * FROM users"
-				+ " WHERE LOGIN = '" + login + "';";
+				+ " WHERE LOGIN = '" + login + "' OR "
+				+ "EMAIL = '" + email + "';";
 		OpenChancels();
 			if(!result.isBeforeFirst()) {
 				query="INSERT users(login,password, storage_all, storage_fill,email) VALUES ('"+login+"','"+password+"','16106127360','0','"+email+"');";
