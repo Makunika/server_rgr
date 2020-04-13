@@ -1,12 +1,13 @@
 package com.server;
 
+import org.apache.tools.zip.*;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
 
-import org.apache.tools.zip.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -21,7 +22,7 @@ public class StorageService {
 
     public static void main(String[] args) throws Exception {
         StorageService test=new StorageService("test1");
-       // String path=test.Zip("ZIPTEST","arcch.zip");
+        // String path=test.Zip("ZIPTEST","arcch.zip");
         test.Unzip("D:\\LAB BLa\\server_rgr\\!server\\test1\\arcch.zip","D:\\!test");
     }
 
@@ -82,7 +83,7 @@ public class StorageService {
         try {
             Files.createDirectory(Paths.get(path+"//" + name));
         } catch (IOException e) {
-           // System.out.println("Already exist");
+            // System.out.println("Already exist");
         }
     }
 
@@ -115,8 +116,8 @@ public class StorageService {
      * @param newName
      */
     public void Rename(String path,String newName){
-       Path f=Paths.get(path);
-       Path rf=Paths.get(f.getParent()+"\\"+newName);
+        Path f=Paths.get(path);
+        Path rf=Paths.get(f.getParent()+"\\"+newName);
         try {
             Files.move(f,rf,REPLACE_EXISTING);
         } catch (IOException e) {
