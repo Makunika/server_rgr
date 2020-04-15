@@ -101,7 +101,7 @@ public class Client implements Runnable {
 		private String login;
 		private String password;
 		private String text;
-		private String urlOrData;
+		private String inStr;
 		private int code;
 		private String out;
 
@@ -121,7 +121,7 @@ public class Client implements Runnable {
 
             String[] string_text_url = pattern.split(strings_all[1]);
             text = string_text_url[0];
-            urlOrData = string_text_url[1];
+            inStr = string_text_url[1];
 
             out = strings_all[0] + "://" + text + "://";
 
@@ -147,8 +147,8 @@ public class Client implements Runnable {
             return password;
         }
 
-        public String getUrlOrData() {
-            return urlOrData;
+        public String getInStr() {
+            return inStr;
         }
     }
 
