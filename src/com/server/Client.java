@@ -34,18 +34,20 @@ public class Client implements Runnable {
             //работа с sql
 			Sql_service sqlService = new Sql_service();
 
+			StorageService storageService=new StorageService(parsedRequest.getLogin());
 
 			//Обработка запроса! (кстати, всегда придется работать с sql, ибо надо всегда проверять логин и пароль. Тогда может StorageService закинуть в sql?)
 			switch (parsedRequest.getCode())
 			{
 				case 100:
 				{
-					if (sqlService.registration(entryClient.login,entryClient.password) != Codes.CodeSql.OkRegistration) {
-						strOut = entryClient.out + "Bad Registration " + "://199";
-						out.writeUTF(entryClient.out + "Bad Registration " + "://199");
+					if (sqlService.registration(parsedRequest.getLogin(),parsedRequest.getPassword(),parsedRequest.getInStr()) != Codes.CodeSql.OkRegistration) {
+						response.setOut("Bad Registration",199);
+						response.doFlush(out);
 					}
 					else {
-                        response.setOut("Ok Registration", 100);
+
+                        response.setOut("Ok Registration " + storageService.GetSize() +  " " +storageService.GetTree(), 100);
 					}
 					break;
 				}
@@ -59,15 +61,6 @@ public class Client implements Runnable {
 					}
 					break;
 				}
-				//кейсы служебной инфы (сколько места, список файлов)
-				case 200:
-				{
-					Storage storage = sqlService.getStorage(parsedRequest.getLogin(),parsedRequest.getPassword());
-					//записываем в out число/число
-                    response.setOut(storage.getStorageAll() +"/" + storage.getStorageFill(), 200);
-					break;
-				}
-				default: break;
 			}
 
 			//Конец обработки запроса

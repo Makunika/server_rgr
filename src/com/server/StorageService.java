@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Enumeration;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -15,15 +16,18 @@ public class StorageService {
     static final Path SERVER_ROOT= Paths.get("!server");
     static final String ARCH_PLACE="ARCH_TEMP";
     static final String SLASH="\\";
+
     private long storageAll=15360;
     private long storageFill=0;
     private Path root;
     private String relRoot;
-
+    private StringBuffer  tree;
+    private StringBuffer BREAKER;
+    private int breaker=0;
     public static void main(String[] args) throws Exception {
         StorageService test=new StorageService("test1");
-        // String path=test.Zip("ZIPTEST","arcch.zip");
-        test.Unzip("D:\\LAB BLa\\server_rgr\\!server\\test1\\arcch.zip","D:\\!test");
+        test.GetTree();
+        System.out.println(test.tree);
     }
 
     /**
@@ -40,6 +44,11 @@ public class StorageService {
             }
         }
 
+        relRoot="!server\\"+Root;
+    }
+
+    public String GetSize()
+    {
         try {
             storageFill=Files.walk(root,Integer.MAX_VALUE)
                     .filter(p -> p.toFile().isFile())
@@ -48,10 +57,42 @@ public class StorageService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        relRoot="!server\\"+Root;
-        SendStoreInfo();
+        return Long.toString(storageFill);
     }
 
+    public String GetTree()
+    {
+        BREAKER=new StringBuffer("");
+        tree=new StringBuffer("");
+        File fileSource=new File(root.toString());
+        RecTree(fileSource);
+        return tree.toString();
+    }
+    private void RecTree(File fileSource)
+    {
+        File[] files = fileSource.listFiles();
+        for(int i=0;i<files.length;i++) {
+            try {
+                BasicFileAttributes atr=Files.readAttributes(files[i].toPath(),BasicFileAttributes.class);
+                if(atr.isDirectory()){
+                    tree.append(BREAKER+files[i].getName()+"\n"+BREAKER+"0\\"+atr.creationTime()+"\n");
+                    BreakerUp();
+                    RecTree(files[i]);
+                    BreakerDown();
+                }else{
+                    tree.append(BREAKER+files[i].getName()+"\n"+BREAKER+files[i].length()+"\\"+atr.creationTime()+"\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void BreakerUp(){
+        BREAKER.append('*');
+    }
+    private void BreakerDown(){
+        BREAKER.deleteCharAt(0);
+    }
     /**
      * Полный путь файла SERVER_ROOT\login\...
      * Размер передаваемого файла

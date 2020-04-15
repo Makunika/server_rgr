@@ -4,6 +4,8 @@
     <bytecodeTargetLevel>
       <module name="buildGradle.main" target="1.8" />
       <module name="buildGradle.test" target="1.8" />
+      <module name="server_rgr.buildGradle.main" target="1.8" />
+      <module name="server_rgr.buildGradle.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
