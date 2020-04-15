@@ -27,12 +27,15 @@ public class Client implements Runnable {
 			String request = in.readUTF();
 			System.out.println("in " + ServerMain.numberOfOnline + " :" + request);
 
+			//то, что пришло
 			ParsedRequest parsedRequest = new ParsedRequest(request);
-
+			//то, что уйдет
+            Response response = new Response(parsedRequest);
+            //работа с sql
 			Sql_service sqlService = new Sql_service();
 
 
-			String strOut = "bad";
+			//Обработка запроса! (кстати, всегда придется работать с sql, ибо надо всегда проверять логин и пароль. Тогда может StorageService закинуть в sql?)
 			switch (parsedRequest.getCode())
 			{
 				case 100:
@@ -42,40 +45,38 @@ public class Client implements Runnable {
 						out.writeUTF(entryClient.out + "Bad Registration " + "://199");
 					}
 					else {
-						strOut = parsedRequest.out + "Ok Registration " + "://100";
-						out.writeUTF(parsedRequest.out + "Ok Registration " + "://100");
+                        response.setOut("Ok Registration", 100);
 					}
-					out.flush();
 					break;
 				}
 				case 101:
 				{
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
-						strOut = parsedRequest.out + "Bad Authorization " + "://199";
-						out.writeUTF(parsedRequest.out + "Bad Authorization " + "://199");
+                        response.setOut("Bad Authorization", 199);
 					}
 					else {
-						strOut = parsedRequest.out + "Ok Authorization " + "://100";
-						out.writeUTF(parsedRequest.out + "Ok Authorization " + "://100");
+                        response.setOut("Ok Authorization", 101);
 					}
-					out.flush();
 					break;
 				}
 				//кейсы служебной инфы (сколько места, список файлов)
 				case 200:
 				{
 					Storage storage = sqlService.getStorage(parsedRequest.getLogin(),parsedRequest.getPassword());
-					strOut = parsedRequest.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200";
-					out.writeUTF(parsedRequest.out + storage.getStorageAll() +"/" + storage.getStorageFill() + "://200");
-					out.flush();
+					//записываем в out число/число
+                    response.setOut(storage.getStorageAll() +"/" + storage.getStorageFill(), 200);
 					break;
 				}
-
 				default: break;
 			}
-			System.out.println("out " + ServerMain.numberOfOnline + " :" + strOut);
-		}
 
+			//Конец обработки запроса
+			//Далее уже отправка
+
+            response.doFlush(out);
+
+			System.out.println("out " + ServerMain.numberOfOnline + " :" + response.out + "://" + response.code);
+		}
 		catch (IOException ex)
 		{
 			ex.printStackTrace();
@@ -95,7 +96,7 @@ public class Client implements Runnable {
 	}
 
 
-	public class ParsedRequest
+	private static class ParsedRequest
 	{
 		private String login;
 		private String password;
@@ -148,6 +149,31 @@ public class Client implements Runnable {
 
         public String getUrlOrData() {
             return urlOrData;
+        }
+    }
+
+    private static class Response
+    {
+        private ParsedRequest parsedRequest;
+        private int code;
+        private String out;
+
+        public Response(ParsedRequest parsedRequest)
+        {
+            this.parsedRequest = parsedRequest;
+        }
+
+
+        public void setOut(String out, int code) {
+            this.out = out;
+            this.code = code;
+        }
+
+        public void doFlush(DataOutputStream outputStream) throws IOException {
+            if (code < 99) throw new IOException("code == null or < 99 in response");
+            if (out == null || out.equals("")) throw  new IOException("out == null in response");
+            outputStream.writeUTF(parsedRequest.getOut() + out + "://" + code);
+            outputStream.flush();
         }
     }
 }
