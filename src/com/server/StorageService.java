@@ -21,13 +21,13 @@ public class StorageService {
     private long storageFill=0;
     private Path root;
     private String relRoot;
-    private StringBuffer  tree;
-    private StringBuffer BREAKER;
+    private StringBuffer tree;
+    private int BREAKER;
     private int breaker=0;
     public static void main(String[] args) throws Exception {
-        StorageService test=new StorageService("test1");
+        StorageService test=new StorageService("maxim");
         test.GetTree();
-        System.out.println(test.tree);
+        System.out.println(test.tree.toString());
     }
 
     /**
@@ -62,9 +62,9 @@ public class StorageService {
 
     public String GetTree()
     {
-        BREAKER=new StringBuffer("");
         tree=new StringBuffer("");
         File fileSource=new File(root.toString());
+        BREAKER = 0;
         RecTree(fileSource);
         return tree.toString();
     }
@@ -75,12 +75,12 @@ public class StorageService {
             try {
                 BasicFileAttributes atr=Files.readAttributes(files[i].toPath(),BasicFileAttributes.class);
                 if(atr.isDirectory()){
-                    tree.append(BREAKER+files[i].getName()+"\n"+BREAKER+"0\\"+atr.creationTime()+"\n");
+                    tree.append(BREAKER + "\t" +files[i].getName()+"\t"+"-1\\"+atr.creationTime()+"\n");
                     BreakerUp();
                     RecTree(files[i]);
                     BreakerDown();
                 }else{
-                    tree.append(BREAKER+files[i].getName()+"\n"+BREAKER+files[i].length()+"\\"+atr.creationTime()+"\n");
+                    tree.append(BREAKER + "\t" +files[i].getName()+"\t"+files[i].length()+"\\"+atr.creationTime()+"\n");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -88,10 +88,10 @@ public class StorageService {
         }
     }
     private void BreakerUp(){
-        BREAKER.append('*');
+        BREAKER++;
     }
     private void BreakerDown(){
-        BREAKER.deleteCharAt(0);
+        BREAKER--;
     }
     /**
      * Полный путь файла SERVER_ROOT\login\...

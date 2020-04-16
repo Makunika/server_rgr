@@ -43,11 +43,10 @@ public class Client implements Runnable {
 				{
 					if (sqlService.registration(parsedRequest.getLogin(),parsedRequest.getPassword(),parsedRequest.getInStr()) != Codes.CodeSql.OkRegistration) {
 						response.setOut("Bad Registration",199);
-						response.doFlush(out);
 					}
 					else {
 
-                        response.setOut("Ok Registration " + storageService.GetSize() +  " " +storageService.GetTree(), 100);
+                        response.setOut("Ok Registration", 100);
 					}
 					break;
 				}
@@ -57,7 +56,8 @@ public class Client implements Runnable {
                         response.setOut("Bad Authorization", 199);
 					}
 					else {
-                        response.setOut("Ok Authorization", 101);
+						long storageAll = sqlService.getStorage(parsedRequest.getLogin(),parsedRequest.getPassword()).getStorageAll();
+                        response.setOut(storageAll + "/" + storageService.GetSize() + "//" + storageService.GetTree(), 100);
 					}
 					break;
 				}
