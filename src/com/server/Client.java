@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 public class Client implements Runnable {
 	
 	private Socket client;
-	private Socket data_socket;
+	private Socket dataSocket;
 	private DataInputStream in;
 	private DataOutputStream out;
 
@@ -61,6 +61,30 @@ public class Client implements Runnable {
 					}
 					break;
 				}
+				case 200: {
+					/*
+					!
+					!
+					!
+					!
+					!
+					!
+					 */
+					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
+						response.setOut("Bad request", 299);
+					} else{
+						dataSocket = new Socket();
+						response.setOut(Integer.toString(dataSocket.getPort()),103);
+						long size=0;
+						boolean Isfile=true;
+						String name="";
+
+						storageService.PrepareTransfer(dataSocket.getInputStream(),size,Isfile,name);
+					}
+
+					break;
+				}
+
 			}
 
 			//Конец обработки запроса

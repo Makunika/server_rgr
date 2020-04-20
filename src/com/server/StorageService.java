@@ -3,6 +3,7 @@ package com.server;
 import org.apache.tools.zip.*;
 
 import java.io.*;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +24,6 @@ public class StorageService {
     private String relRoot;
     private StringBuffer tree;
     private int BREAKER;
-    private int breaker=0;
     public static void main(String[] args) throws Exception {
         StorageService test=new StorageService("maxim");
         test.GetTree();
@@ -43,8 +43,11 @@ public class StorageService {
                 e.printStackTrace();
             }
         }
-
         relRoot="!server\\"+Root;
+    }
+
+    void PrepareTransfer(InputStream in,long size,boolean isfile,String path) {
+
     }
 
     public String GetSize()
@@ -97,13 +100,13 @@ public class StorageService {
      * Полный путь файла SERVER_ROOT\login\...
      * Размер передаваемого файла
      * Инпут с сокета
-     * @param fileName
      * @param size
      * @param in
      * @throws IOException
      */
-    void AddTo(String fileName,long size, DataInputStream in) throws IOException {
-        OutputStream output = new FileOutputStream(fileName);
+    void AddTo(long size, DataInputStream in) throws IOException {
+
+        OutputStream output = new FileOutputStream(Long.toString(System.currentTimeMillis())+root);
         byte[] buffer = new byte[8008];
         int bytesRead;
         while (size > 0 && (bytesRead = in.read(buffer, 0, (int)Math.min(buffer.length, size))) != -1)
