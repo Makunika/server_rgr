@@ -106,16 +106,12 @@ public class StorageService {
         BREAKER--;
     }
 
-    public int prepairTrans(InputStream InputStream,String name,long size,boolean isPapka,Storage storage){
-        if(storage.storageFill+size>storage.storageAll) return 298;
-        if(isPapka){
-
-        }
+    public int prepairTrans(DataInputStream InputStream,String name,long size,boolean isPapka){
+        //if(storage.storageFill+size>storage.storageAll) return 298;
+        if(isPapka){ }
         else{
             try {
-                DataInputStream dataInputStream=new DataInputStream(InputStream);
-                fileTrans(dataInputStream,name);
-                InputStream.close();
+                fileTrans(InputStream,name);
             } catch (IOException e) {
                 e.printStackTrace();
                 return 297;
@@ -140,8 +136,6 @@ public class StorageService {
             fos.write(buffer, 0, i);
             sizel-= i;
         }
-        bis.close();
-        dataInputStream.close();
     }
 
 
