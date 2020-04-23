@@ -73,11 +73,14 @@ public class Client implements Runnable {
 						boolean isPapka;
 						isPapka= parsedRequest.newTrans[2].equals("1");
 						String name=parsedRequest.newTrans[0];
-						dataSocket = new Socket();
+						ServerSocket socketData=new ServerSocket();
+						response.setOut(Integer.toString(socketData.getLocalPort()),200);
+						dataSocket = socketData.accept();
+
 						if(0==storageService.prepairTrans(dataSocket.getInputStream(),name,size,isPapka,sqlService.getStorage(parsedRequest.login,parsedRequest.password))){
 							sqlService.ChangeSpace(parsedRequest.login,parsedRequest.password,size);
 						}
-						response.setOut(Integer.toString(dataSocket.getPort()),200);
+
 						storageService.PrepareTransfer(dataSocket.getInputStream(),size,isPapka,name);
 
 					}

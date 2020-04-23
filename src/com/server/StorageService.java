@@ -108,11 +108,14 @@ public class StorageService {
 
     public int prepairTrans(InputStream InputStream,String name,long size,boolean isPapka,Storage storage){
         if(storage.storageFill+size>storage.storageAll) return 298;
-        if(isPapka){ }
+        if(isPapka){
+
+        }
         else{
             try {
                 DataInputStream dataInputStream=new DataInputStream(InputStream);
                 fileTrans(dataInputStream,name);
+                InputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
                 return 297;
