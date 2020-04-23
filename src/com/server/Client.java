@@ -36,7 +36,7 @@ public class Client implements Runnable {
 
 			StorageService storageService=new StorageService(parsedRequest.getLogin());
 
-			//Обработка запроса! (кстати, всегда придется работать с sql, ибо надо всегда проверять логин и пароль. Тогда может StorageService закинуть в sql?)
+
 			switch (parsedRequest.getCode())
 			{
 				case 100:
@@ -62,24 +62,22 @@ public class Client implements Runnable {
 					break;
 				}
 				case 200: {
-					/*
-					!
-					!
-					!
-					!
-					!
-					!
-					 */
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
 					} else{
+						long size=Long.getLong(parsedRequest.newTrans[1]);
+						boolean isPapka;
+						if(parsedRequest.newTrans[2]=="1")
+							isPapka=true;
+						else isPapka=false;
+						String name=parsedRequest.newTrans[0];
 						dataSocket = new Socket();
+						if(0==storageService.prepairTrans(dataSocket.getInputStream(),name,size,isPapka,sqlService.getStorage(parsedRequest.login,parsedRequest.password))){
+							sqlService.ChangeSpace(parsedRequest.login,parsedRequest.password,size);
+						}
 						response.setOut(Integer.toString(dataSocket.getPort()),103);
-						long size=0;
-						boolean Isfile=true;
-						String name="";
+						storageService.PrepareTransfer(dataSocket.getInputStream(),size,isPapka,name);
 
-						storageService.PrepareTransfer(dataSocket.getInputStream(),size,Isfile,name);
 					}
 
 					break;
@@ -121,6 +119,19 @@ public class Client implements Runnable {
 		private String inStr;
 		private int code;
 		private String out;
+		private String [] newTrans;
+
+		public void ParseNewTrans(){
+			newTrans=new String[3];
+			int r1=0;
+			int r2=inStr.indexOf("//");
+			newTrans[0]=inStr.substring(r1,r2);
+			r1=r2+2;
+			r2=inStr.indexOf("//",r1);
+			newTrans[1]=inStr.substring(r1,r2);
+			r1=r2+2;
+			newTrans[2]=inStr.substring(r1,r1+1);
+		}
 
         public ParsedRequest(String request) throws IOException
         {

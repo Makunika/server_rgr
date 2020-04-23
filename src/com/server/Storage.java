@@ -1,8 +1,8 @@
 package com.server;
 
 public class Storage {
-    private long storageAll;
-    private long storageFill;
+    public long storageAll;
+    public long storageFill;
 
     public void setStorageAll(long storageAll) {
         this.storageAll = storageAll;

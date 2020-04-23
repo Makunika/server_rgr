@@ -76,6 +76,9 @@ public class Sql_service {
 		return storage;
 	}
 
+	public void ChangeSpace(String login, String password,long size){
+
+	}
 
 
 	public CodeSql registration(String login, String password, String email)

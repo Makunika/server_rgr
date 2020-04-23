@@ -4,6 +4,7 @@ import org.apache.tools.zip.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,18 +18,26 @@ public class StorageService {
     static final Path SERVER_ROOT= Paths.get("!server");
     static final String ARCH_PLACE="ARCH_TEMP";
     static final String SLASH="\\";
-
+    private static ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
     private long storageAll=15360;
     private long storageFill=0;
     private Path root;
     private String relRoot;
     private StringBuffer tree;
     private int BREAKER;
+
+    public String newTrans[];
+    public String inStr;
+
     public static void main(String[] args) throws Exception {
         StorageService test=new StorageService("maxim");
-        test.GetTree();
+       test.GetTree();
         System.out.println(test.tree.toString());
     }
+
+
+
+
 
     /**
      * Передаем логин
@@ -45,6 +54,7 @@ public class StorageService {
         }
         relRoot="!server\\"+Root;
     }
+
 
     void PrepareTransfer(InputStream in,long size,boolean isfile,String path) {
 
@@ -63,16 +73,15 @@ public class StorageService {
         return Long.toString(storageFill);
     }
 
-    public String GetTree()
-    {
+
+    public String GetTree() {
         tree=new StringBuffer("");
         File fileSource=new File(root.toString());
         BREAKER = 0;
         RecTree(fileSource);
         return tree.toString();
     }
-    private void RecTree(File fileSource)
-    {
+    private void RecTree(File fileSource) {
         File[] files = fileSource.listFiles();
         for(int i=0;i<files.length;i++) {
             try {
@@ -96,25 +105,42 @@ public class StorageService {
     private void BreakerDown(){
         BREAKER--;
     }
-    /**
-     * Полный путь файла SERVER_ROOT\login\...
-     * Размер передаваемого файла
-     * Инпут с сокета
-     * @param size
-     * @param in
-     * @throws IOException
-     */
-    void AddTo(long size, DataInputStream in) throws IOException {
 
-        OutputStream output = new FileOutputStream(Long.toString(System.currentTimeMillis())+root);
-        byte[] buffer = new byte[8008];
-        int bytesRead;
-        while (size > 0 && (bytesRead = in.read(buffer, 0, (int)Math.min(buffer.length, size))) != -1)
-        {
-            output.write(buffer, 0, bytesRead);
-            size -= bytesRead;
+    public int prepairTrans(InputStream InputStream,String name,long size,boolean isPapka,Storage storage){
+        if(storage.storageFill+size>storage.storageAll) return 298;
+        if(isPapka){ }
+        else{
+            try {
+                DataInputStream dataInputStream=new DataInputStream(InputStream);
+                fileTrans(dataInputStream,name);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return 297;
+            }
+            return 0;
         }
+        return -1;
     }
+    private void fileTrans(DataInputStream dataInputStream,String name) throws IOException {
+        File file=new File(relRoot+name);
+        file.createNewFile();
+        FileOutputStream fos=new FileOutputStream(file);
+        BufferedInputStream bis = new BufferedInputStream(dataInputStream);
+
+        byte buffer[]=new byte[8008];
+        byte size[]=new byte[8];
+        bis.read(size);
+        long sizel=bytesToLong(size);
+
+        while (sizel > 0) {
+            int i = bis.read(buffer);
+            fos.write(buffer, 0, i);
+            sizel-= i;
+        }
+        bis.close();
+        dataInputStream.close();
+    }
+
 
     /**
      * Путь в котором будем создавать
@@ -144,15 +170,6 @@ public class StorageService {
         }
     }
 
-
-    /**
-     * Тут мы сразу после входа составим всю инфу о всех файлах и путях а так же занимаемом месте в строку
-     *  и вернем в client чтобы отправить пользователю
-     *
-     */
-    String SendStoreInfo() {
-        return null;
-    }
 
     /**
      * Путь по которому лежит файл/дериктория + новое имя(расширение обязательно указывать)
@@ -213,19 +230,16 @@ public class StorageService {
         }
     }
 
-    private void createDir(final String dir)
-    {
+    private void createDir(final String dir) {
         File file = new File(dir);
         if (!file.exists())
             file.mkdirs();
     }
-    private void createFolder(final String dirName)
-    {
+    private void createFolder(final String dirName) {
         if (dirName.endsWith(SLASH))
             createDir(dirName.substring(0, dirName.length() - 1));
     }
-    private void checkFolder(final String file_path)
-    {
+    private void checkFolder(final String file_path) {
         if (!file_path.endsWith(SLASH) && file_path.contains(SLASH)) {
             String dir = file_path.substring(0, file_path.lastIndexOf(SLASH));
             createDir(dir);
@@ -264,5 +278,11 @@ public class StorageService {
         }
         zipFile.close() ;
         System.out.println("Zip файл разархивирован!");
+    }
+    public static long bytesToLong(byte[] bytes) {
+
+        buffer.put(bytes, 0, bytes.length);
+        buffer.flip();//need flip
+        return buffer.getLong();
     }
 }
