@@ -71,9 +71,7 @@ public class Client implements Runnable {
 						parsedRequest.ParseNewTrans();
 						long size=Long.getLong(parsedRequest.newTrans[1]);
 						boolean isPapka;
-						if(parsedRequest.newTrans[2]=="1")
-							isPapka=true;
-						else isPapka=false;
+						isPapka= parsedRequest.newTrans[2].equals("1");
 						String name=parsedRequest.newTrans[0];
 						dataSocket = new Socket();
 						if(0==storageService.prepairTrans(dataSocket.getInputStream(),name,size,isPapka,sqlService.getStorage(parsedRequest.login,parsedRequest.password))){
@@ -126,15 +124,9 @@ public class Client implements Runnable {
 		private String [] newTrans;
 
 		public void ParseNewTrans(){
-			newTrans=new String[3];
-			int r1=0;
-			int r2=inStr.indexOf("//");
-			newTrans[0]=inStr.substring(r1,r2);
-			r1=r2+2;
-			r2=inStr.indexOf("//",r1);
-			newTrans[1]=inStr.substring(r1,r2);
-			r1=r2+2;
-			newTrans[2]=inStr.substring(r1,r1+1);
+			Pattern pattern = Pattern.compile("//");
+			newTrans = pattern.split(inStr);
+
 		}
 
         public ParsedRequest(String request) throws IOException
