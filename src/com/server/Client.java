@@ -83,21 +83,21 @@ public class Client implements Runnable {
 						else
 						{
 							response.setOut("ok file",200);
-
 							response.doFlush(out);
 							isResponsed = false;
-
-							//Thread.sleep(800);
-
 							if(0==storageService.prepairTrans(in,name,size,isPapka)){
 								sqlService.ChangeSpace(parsedRequest.login,parsedRequest.password,size);
 							}
-
-							//storageService.PrepareTransfer(dataSocket.getInputStream(),size,isPapka,name);
 						}
-
 					}
-
+					break;
+				}
+				case 201:{
+					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
+						response.setOut("Bad request", 299);
+					} else{
+						storageService.OutTrans(new BufferedOutputStream(out),parsedRequest.inStr);
+					}
 					break;
 				}
 

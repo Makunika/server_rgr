@@ -138,6 +138,21 @@ public class StorageService {
         }
     }
 
+    public boolean OutTrans(BufferedOutputStream bos,String name) throws IOException {
+        File file=new File(relRoot+name);
+        if(!file.exists()) return false;
+        BufferedInputStream oif = new BufferedInputStream(new FileInputStream(file));
+        bos.write(longToBytes(file.length()));
+        byte[] buffer = new byte[8192];
+        int i = 0;
+        while ( (i = oif.read(buffer)) != -1)
+        {
+            bos.write(buffer,0,i);
+        }
+        bos.flush();
+        return true;
+    }
+
 
     /**
      * Путь в котором будем создавать
@@ -281,5 +296,10 @@ public class StorageService {
         buffer.put(bytes, 0, bytes.length);
         buffer.flip();//need flip
         return buffer.getLong();
+    }
+    private static byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
     }
 }
