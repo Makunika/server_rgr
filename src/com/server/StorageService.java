@@ -276,10 +276,12 @@ public class StorageService {
         zipFile.close() ;
         System.out.println("Zip файл разархивирован!");
     }
-    public static long bytesToLong(byte[] bytes) {
-
-        buffer.put(bytes, 0, bytes.length);
-        buffer.flip();//need flip
-        return buffer.getLong();
+    public long bytesToLong(byte[] bytes) {
+        long result = 0;
+        for (int i = 0; i < Long.BYTES; i++) {
+            result <<= Long.BYTES;
+            result |= (bytes[i] & 0xFF);
+        }
+        return result;
     }
 }
