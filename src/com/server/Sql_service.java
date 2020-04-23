@@ -76,10 +76,35 @@ public class Sql_service {
 		return storage;
 	}
 
-	public void ChangeSpace(String login, String password,long size){
+	public void ChangeSpaceFill(String login, String password,long newSize){
+		try {
+			Connect();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+		}
 
+		try {
+			query = "SELECT * FROM users"
+					+ " WHERE LOGIN = '" + login + "' AND "
+					+ "PASSWORD = '" + password + "';";
+			OpenChancels();
+			if(!result.isBeforeFirst()) {
+				query="INSERT users(storage_fill) VALUES ('"+newSize+"');";
+				state.executeUpdate(query);
+			}
+		}
+		catch(SQLException e1){
+			e1.printStackTrace();
+		}
+		finally {
+			CloseConnection();
+		}
 	}
-
+	public void ChangeSpace(String login, String password,long newSize)
+	{
+		ChangeSpaceFill(login,password, getStorage(login, password).storageFill+newSize);
+	}
 
 	public CodeSql registration(String login, String password, String email)
 	{

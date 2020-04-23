@@ -2,6 +2,7 @@ package com.server;
 
 import java.net.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class Client implements Runnable {
@@ -36,7 +37,7 @@ public class Client implements Runnable {
 
 			StorageService storageService=new StorageService(parsedRequest.getLogin());
 
-
+			//Обработка запроса! (кстати, всегда придется работать с sql, ибо надо всегда проверять логин и пароль. Тогда может StorageService закинуть в sql?)
 			switch (parsedRequest.getCode())
 			{
 				case 100:
@@ -56,8 +57,10 @@ public class Client implements Runnable {
                         response.setOut("Bad Authorization", 199);
 					}
 					else {
+						long storageFill = Long.parseLong(storageService.GetSize());
 						long storageAll = sqlService.getStorage(parsedRequest.getLogin(),parsedRequest.getPassword()).getStorageAll();
-                        response.setOut(storageAll + "/" + storageService.GetSize() + "//" + storageService.GetTree(), 100);
+                        response.setOut(storageAll + "/" + storageFill + "//" + storageService.GetTree(), 100);
+                        sqlService.ChangeSpaceFill(parsedRequest.getLogin(),parsedRequest.getPassword(),storageFill);
 					}
 					break;
 				}
@@ -65,6 +68,7 @@ public class Client implements Runnable {
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
 					} else{
+						parsedRequest.ParseNewTrans();
 						long size=Long.getLong(parsedRequest.newTrans[1]);
 						boolean isPapka;
 						if(parsedRequest.newTrans[2]=="1")
@@ -75,7 +79,7 @@ public class Client implements Runnable {
 						if(0==storageService.prepairTrans(dataSocket.getInputStream(),name,size,isPapka,sqlService.getStorage(parsedRequest.login,parsedRequest.password))){
 							sqlService.ChangeSpace(parsedRequest.login,parsedRequest.password,size);
 						}
-						response.setOut(Integer.toString(dataSocket.getPort()),103);
+						response.setOut(Integer.toString(dataSocket.getPort()),200);
 						storageService.PrepareTransfer(dataSocket.getInputStream(),size,isPapka,name);
 
 					}
@@ -200,7 +204,13 @@ public class Client implements Runnable {
         public void doFlush(DataOutputStream outputStream) throws IOException {
             if (code < 99) throw new IOException("code == null or < 99 in response");
             if (out == null || out.equals("")) throw  new IOException("out == null in response");
-            outputStream.writeUTF(parsedRequest.getOut() + out + "://" + code);
+
+            String str = parsedRequest.getOut() + out + "://" + code;
+
+            System.out.println("length out :" + str.length());
+            byte[] b = str.getBytes(StandardCharsets.UTF_8);
+            outputStream.writeInt(b.length);
+            outputStream.write(b);
             outputStream.flush();
         }
     }
