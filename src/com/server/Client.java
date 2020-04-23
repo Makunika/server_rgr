@@ -28,6 +28,7 @@ public class Client implements Runnable {
 			String request = in.readUTF();
 			System.out.println("in " + ServerMain.numberOfOnline + " :" + request);
 
+			boolean isResponsed = true;
 			//то, что пришло
 			ParsedRequest parsedRequest = new ParsedRequest(request);
 			//то, что уйдет
@@ -69,16 +70,31 @@ public class Client implements Runnable {
 						response.setOut("Bad request", 299);
 					} else{
 						parsedRequest.ParseNewTrans();
-						long size=Long.getLong(parsedRequest.newTrans[1]);
+						long size=Long.parseLong(parsedRequest.getNewTrans()[1]);
 						boolean isPapka;
-						isPapka= parsedRequest.newTrans[2].equals("1");
+						isPapka = !parsedRequest.newTrans[2].equals("1");
 						String name=parsedRequest.newTrans[0];
-						dataSocket = new Socket();
-						if(0==storageService.prepairTrans(dataSocket.getInputStream(),name,size,isPapka,sqlService.getStorage(parsedRequest.login,parsedRequest.password))){
-							sqlService.ChangeSpace(parsedRequest.login,parsedRequest.password,size);
+
+						Storage storage = sqlService.getStorage(parsedRequest.login,parsedRequest.password);
+						if (storage.storageFill + size > storage.storageAll)
+						{
+							response.setOut("Mesta net", 298);
 						}
-						response.setOut(Integer.toString(dataSocket.getPort()),200);
-						storageService.PrepareTransfer(dataSocket.getInputStream(),size,isPapka,name);
+						else
+						{
+							response.setOut("ok file",200);
+
+							response.doFlush(out);
+							isResponsed = false;
+
+							//Thread.sleep(800);
+
+							if(0==storageService.prepairTrans(in,name,size,isPapka)){
+								sqlService.ChangeSpace(parsedRequest.login,parsedRequest.password,size);
+							}
+
+							//storageService.PrepareTransfer(dataSocket.getInputStream(),size,isPapka,name);
+						}
 
 					}
 
@@ -90,12 +106,11 @@ public class Client implements Runnable {
 			//Конец обработки запроса
 			//Далее уже отправка
 
-            response.doFlush(out);
+            if (isResponsed) response.doFlush(out);
 
 			System.out.println("out " + ServerMain.numberOfOnline + " :" + response.out + "://" + response.code);
 		}
-		catch (IOException ex)
-		{
+		catch (IOException ex) {
 			ex.printStackTrace();
 		}
 		try {
@@ -113,7 +128,7 @@ public class Client implements Runnable {
 	}
 
 
-	private static class ParsedRequest
+	private class ParsedRequest
 	{
 		private String login;
 		private String password;
@@ -121,7 +136,7 @@ public class Client implements Runnable {
 		private String inStr;
 		private int code;
 		private String out;
-		private String [] newTrans;
+		private String[] newTrans;
 
 		public void ParseNewTrans(){
 			Pattern pattern = Pattern.compile("//");
@@ -174,7 +189,11 @@ public class Client implements Runnable {
         public String getInStr() {
             return inStr;
         }
-    }
+
+		public String[] getNewTrans() {
+			return newTrans;
+		}
+	}
 
     private static class Response
     {
@@ -200,6 +219,7 @@ public class Client implements Runnable {
             String str = parsedRequest.getOut() + out + "://" + code;
 
             System.out.println("length out :" + str.length());
+            System.out.println("out : " + str);
             byte[] b = str.getBytes(StandardCharsets.UTF_8);
             outputStream.writeInt(b.length);
             outputStream.write(b);
