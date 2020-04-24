@@ -120,11 +120,24 @@ public class Client implements Runnable {
 					response.setOut("Bad request", 299);
 				} else{
 					if(storageService.Relocate(parsedRequest.splitData[0],parsedRequest.splitData[1])){
-						response.setOut("Relocate successful", 202);
+						response.setOut("Relocate successful", 203);
 					} else
 						response.setOut("Relocate failed",298);
 				}
 			}
+			/* Новая папка*/
+				case 204:{
+					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
+						response.setOut("Bad request", 299);
+					} else{
+						parsedRequest.parseNewCatalog();
+						if(storageService.AddCatalog(parsedRequest.splitData[0],parsedRequest.splitData[1]))
+							response.setOut("CreateDir failed",297);
+						else
+							response.setOut("CreateDir successful",294);
+					}
+					break;
+				}
 
 			}
 
@@ -169,6 +182,10 @@ public class Client implements Runnable {
 
 		}
 		public void parseRename(){
+			Pattern pattern = Pattern.compile("//");
+			splitData = pattern.split(inStr);
+		}
+		public void parseNewCatalog(){
 			Pattern pattern = Pattern.compile("//");
 			splitData = pattern.split(inStr);
 		}

@@ -169,12 +169,14 @@ public class StorageService {
      * @param name
      * @throws IOException
      */
-    void AddCatalog(String path,String name) {
+    public boolean AddCatalog(String path,String name) {
         try {
             Files.createDirectory(Paths.get(path+"//" + name));
+            return true;
         } catch (IOException e) {
-            // System.out.println("Already exist");
+            e.printStackTrace();
         }
+        return false;
     }
 
     /**
@@ -304,14 +306,13 @@ public class StorageService {
         System.out.println("Zip файл разархивирован!");
     }
     public static long bytesToLong(byte[] bytes) {
-
+        buffer.clear();
         buffer.put(bytes, 0, bytes.length);
         buffer.flip();//need flip
-        long temp=buffer.getLong();
-        buffer.clear();
-        return temp;
+        return buffer.getLong();
     }
     private static byte[] longToBytes(long x) {
+        buffer.clear();
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(x);
         return buffer.array();
