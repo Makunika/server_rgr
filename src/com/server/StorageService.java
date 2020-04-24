@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Enumeration;
+import java.util.Random;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -28,13 +29,20 @@ public class StorageService {
 
     public String newTrans[];
     public String inStr;
-
+/*
     public static void main(String[] args) throws Exception {
         StorageService test=new StorageService("maxim");
        test.GetTree();
         System.out.println(test.tree.toString());
-    }
+        Random random=new Random(1);
+        for(int i=0;i<10000;i++) {
+            byte[] a=new byte[8];
+            random.nextBytes(a);
+            System.out.println(bytesToLong(a));
+        }
 
+    }
+*/
 
 
 
@@ -174,12 +182,14 @@ public class StorageService {
      * @param curPath
      * @param newPath
      */
-    void Relocate(String curPath,String newPath) {
+    public boolean Relocate(String curPath,String newPath) {
         try {
             Files.move(Paths.get(curPath),Paths.get(newPath),ATOMIC_MOVE,REPLACE_EXISTING);
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
 
@@ -188,14 +198,16 @@ public class StorageService {
      * @param path
      * @param newName
      */
-    public void Rename(String path,String newName){
+    public boolean Rename(String path,String newName){
         Path f=Paths.get(path);
         Path rf=Paths.get(f.getParent()+"\\"+newName);
         try {
             Files.move(f,rf,REPLACE_EXISTING);
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     /**
@@ -295,7 +307,9 @@ public class StorageService {
 
         buffer.put(bytes, 0, bytes.length);
         buffer.flip();//need flip
-        return buffer.getLong();
+        long temp=buffer.getLong();
+        buffer.clear();
+        return temp;
     }
     private static byte[] longToBytes(long x) {
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);

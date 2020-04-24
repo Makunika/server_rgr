@@ -70,10 +70,10 @@ public class Client implements Runnable {
 						response.setOut("Bad request", 299);
 					} else{
 						parsedRequest.ParseNewTrans();
-						long size=Long.parseLong(parsedRequest.getNewTrans()[1]);
+						long size=Long.parseLong(parsedRequest.getSplitData()[1]);
 						boolean isPapka;
-						isPapka = !parsedRequest.newTrans[2].equals("1");
-						String name=parsedRequest.newTrans[0];
+						isPapka = !parsedRequest.splitData[2].equals("1");
+						String name=parsedRequest.splitData[0];
 
 						Storage storage = sqlService.getStorage(parsedRequest.login,parsedRequest.password);
 						if (storage.storageFill + size > storage.storageAll)
@@ -96,10 +96,35 @@ public class Client implements Runnable {
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
 					} else{
+						/*Нужно ли тебе знать что-то о файле если ты его запрашиваешь?*/
 						storageService.OutTrans(new BufferedOutputStream(out),parsedRequest.inStr);
 					}
 					break;
 				}
+				/*Rename*/
+				case 202:{
+					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
+						response.setOut("Bad request", 299);
+					} else{
+						if(storageService.Rename(parsedRequest.splitData[0],parsedRequest.splitData[1])){
+							response.setOut("Rename successful", 202);
+						} else
+							response.setOut("Rename failed",298);
+					}
+				}
+				/*Relocate
+				* Нужно ли отсылать тебе дерево?
+				* */
+				case 203:{
+				if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
+					response.setOut("Bad request", 299);
+				} else{
+					if(storageService.Relocate(parsedRequest.splitData[0],parsedRequest.splitData[1])){
+						response.setOut("Relocate successful", 202);
+					} else
+						response.setOut("Relocate failed",298);
+				}
+			}
 
 			}
 
@@ -136,12 +161,16 @@ public class Client implements Runnable {
 		private String inStr;
 		private int code;
 		private String out;
-		private String[] newTrans;
+		private String[] splitData;
 
 		public void ParseNewTrans(){
 			Pattern pattern = Pattern.compile("//");
-			newTrans = pattern.split(inStr);
+			splitData = pattern.split(inStr);
 
+		}
+		public void parseRename(){
+			Pattern pattern = Pattern.compile("//");
+			splitData = pattern.split(inStr);
 		}
 
         public ParsedRequest(String request) throws IOException
@@ -190,8 +219,8 @@ public class Client implements Runnable {
             return inStr;
         }
 
-		public String[] getNewTrans() {
-			return newTrans;
+		public String[] getSplitData() {
+			return splitData;
 		}
 	}
 
