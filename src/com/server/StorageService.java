@@ -1,21 +1,22 @@
 package com.server;
 
-import org.apache.tools.zip.*;
+import org.apache.tools.zip.ZipEntry;
+import org.apache.tools.zip.ZipFile;
+import org.apache.tools.zip.ZipOutputStream;
 
 import java.io.*;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Enumeration;
-import java.util.Random;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class StorageService {
+
     static final Path SERVER_ROOT= Paths.get("!server");
     static final String ARCH_PLACE="ARCH_TEMP";
     static final String SLASH="\\";
@@ -306,15 +307,19 @@ public class StorageService {
         System.out.println("Zip файл разархивирован!");
     }
     public static long bytesToLong(byte[] bytes) {
-        buffer.clear();
-        buffer.put(bytes, 0, bytes.length);
-        buffer.flip();//need flip
-        return buffer.getLong();
+        long result = 0;
+        for (int i = 0; i < Long.BYTES; i++) {
+            result <<= Long.BYTES;
+            result |= (bytes[i] & 0xFF);
+        }
+        return result;
     }
     private static byte[] longToBytes(long x) {
-        buffer.clear();
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
+        byte[] result = new byte[8];
+        for (int i = 7; i >= 0; i--) {
+            result[i] = (byte)(x & 0xFF);
+            x >>= 8;
+        }
+        return result;
     }
 }

@@ -17,4 +17,8 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'org.apache.ant', name: 'ant', version: '1.9.4'
+    // https://mvnrepository.com/artifact/javax.mail/javax.mail-api
+    compile group: 'javax.mail', name: 'javax.mail-api', version: '1.5.6'
+    compile group: 'javax.activation', name: 'activation', version: '1.1'
+
 }
