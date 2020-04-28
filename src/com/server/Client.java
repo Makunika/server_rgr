@@ -96,6 +96,9 @@ public class Client implements Runnable {
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
 					} else{
+						response.setOut("ok file",201);
+						response.doFlush(out);
+						isResponsed = false;
 						/*Нужно ли тебе знать что-то о файле если ты его запрашиваешь?*/
 						storageService.OutTrans(new BufferedOutputStream(out),parsedRequest.inStr);
 					}
