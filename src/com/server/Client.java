@@ -1,7 +1,10 @@
 package com.server;
 
-import java.net.*;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
@@ -35,10 +38,10 @@ public class Client implements Runnable {
             Response response = new Response(parsedRequest);
             //работа с sql
 			Sql_service sqlService = new Sql_service();
-
+			//работа с памятью
 			StorageService storageService=new StorageService(parsedRequest.getLogin());
 
-			//Обработка запроса! (кстати, всегда придется работать с sql, ибо надо всегда проверять логин и пароль. Тогда может StorageService закинуть в sql?)
+			//Обработка запроса!
 			switch (parsedRequest.getCode())
 			{
 				case 100:
@@ -99,7 +102,6 @@ public class Client implements Runnable {
 						response.setOut("ok file",201);
 						response.doFlush(out);
 						isResponsed = false;
-						/*Нужно ли тебе знать что-то о файле если ты его запрашиваешь?*/
 						storageService.OutTrans(new BufferedOutputStream(out),parsedRequest.inStr);
 					}
 					break;
@@ -119,15 +121,15 @@ public class Client implements Runnable {
 				* Нужно ли отсылать тебе дерево?
 				* */
 				case 203:{
-				if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
-					response.setOut("Bad request", 299);
-				} else{
-					if(storageService.Relocate(parsedRequest.splitData[0],parsedRequest.splitData[1])){
-						response.setOut("Relocate successful", 203);
-					} else
-						response.setOut("Relocate failed",298);
+					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
+						response.setOut("Bad request", 299);
+					} else{
+						if(storageService.Relocate(parsedRequest.splitData[0],parsedRequest.splitData[1])){
+							response.setOut("Relocate successful", 203);
+						} else
+							response.setOut("Relocate failed",298);
+					}
 				}
-			}
 			/* Новая папка*/
 				case 204:{
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
@@ -141,13 +143,26 @@ public class Client implements Runnable {
 					}
 					break;
 				}
+				/*забыл парольчик*/
+				case 300:{
+					String[] loginAndPassword = sqlService.getPasswordAndLogin(parsedRequest.inStr);
+					if (loginAndPassword[0].equals("null") || loginAndPassword[1].equals("null"))
+					{
+						response.setOut("Bad email", 399);
+					}
+					else
+					{
+						response.setOut("Send password and login ok", 300);
+						RestorePassword.sendMail(parsedRequest.inStr,loginAndPassword[0],loginAndPassword[1]);
+					}
+					break;
+				}
 
 			}
 
 			//Конец обработки запроса
 			//Далее уже отправка
-
-            if (isResponsed) response.doFlush(out);
+			if (isResponsed) response.doFlush(out);
 
 			System.out.println("out " + ServerMain.numberOfOnline + " :" + response.out + "://" + response.code);
 		}

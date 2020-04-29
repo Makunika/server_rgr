@@ -1,7 +1,8 @@
 package com.server;
 
+import com.server.Codes.CodeSql;
+
 import java.sql.*;
-import com.server.Codes.*;
 
 public class Sql_service {
 	private static final String sql_url = "jdbc:mysql://localhost/users?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
@@ -75,6 +76,44 @@ public class Sql_service {
 
 		return storage;
 	}
+
+
+	public String[] getPasswordAndLogin(String email)
+	{
+		try {
+			Connect();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+		}
+
+		String[] loginAndPassword = new String[]
+				{
+					"null",
+					"null"
+				};
+
+		try {
+			query = "SELECT * FROM users"
+					+ " WHERE EMAIL = '" + email + "';";
+			OpenChancels();
+			state = connection.createStatement();
+			result=state.executeQuery(query);
+			if(result.isBeforeFirst()) {
+				result.next();
+				loginAndPassword[1] = result.getString("password");
+				loginAndPassword[0] = result.getString("login");
+			}
+		}
+		catch(SQLException e1){
+			e1.printStackTrace();
+		}
+		finally {
+			CloseConnection();
+		}
+		return loginAndPassword;
+	}
+
 
 	public void ChangeSpaceFill(String login, String password,long newSize){
 		try {
