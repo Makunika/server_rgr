@@ -111,11 +111,13 @@ public class Client implements Runnable {
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
 					} else{
+						parsedRequest.parseRename();
 						if(storageService.Rename(parsedRequest.splitData[0],parsedRequest.splitData[1])){
 							response.setOut("Rename successful", 202);
 						} else
 							response.setOut("Rename failed",298);
 					}
+					break;
 				}
 				/*Relocate
 				* Нужно ли отсылать тебе дерево?
@@ -124,11 +126,13 @@ public class Client implements Runnable {
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
 					} else{
+						parsedRequest.parseRename();
 						if(storageService.Relocate(parsedRequest.splitData[0],parsedRequest.splitData[1])){
 							response.setOut("Relocate successful", 203);
 						} else
 							response.setOut("Relocate failed",298);
 					}
+					break;
 				}
 			/* Новая папка*/
 				case 204:{

@@ -10,6 +10,7 @@ import java.util.Properties;
 public class RestorePassword {
 
     static public void main(String args[]) throws MessagingException {
+
         sendMail("pshblo.max@gmail.com", "lol", "hello");
     }
 

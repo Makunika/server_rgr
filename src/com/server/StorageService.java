@@ -145,6 +145,7 @@ public class StorageService {
             fos.write(buffer, 0, i);
             sizel-= i;
         }
+        bis.close();
     }
 
     public boolean OutTrans(BufferedOutputStream bos,String name) throws IOException {
@@ -159,6 +160,7 @@ public class StorageService {
             bos.write(buffer,0,i);
         }
         bos.flush();
+        oif.close();
         return true;
     }
 
@@ -187,7 +189,7 @@ public class StorageService {
      */
     public boolean Relocate(String curPath,String newPath) {
         try {
-            Files.move(Paths.get(curPath),Paths.get(newPath),ATOMIC_MOVE,REPLACE_EXISTING);
+            Files.move(Paths.get(relRoot + curPath),Paths.get(relRoot + newPath),ATOMIC_MOVE,REPLACE_EXISTING);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -202,7 +204,7 @@ public class StorageService {
      * @param newName
      */
     public boolean Rename(String path,String newName){
-        Path f=Paths.get(path);
+        Path f=Paths.get(relRoot + path);
         Path rf=Paths.get(f.getParent()+"\\"+newName);
         try {
             Files.move(f,rf,REPLACE_EXISTING);
