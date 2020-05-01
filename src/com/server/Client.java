@@ -147,6 +147,23 @@ public class Client implements Runnable {
 					}
 					break;
 				}
+				/*Удаление*/
+				case 205:{
+					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
+						response.setOut("Bad request", 299);
+					} else{
+						parsedRequest.parseDelete();
+						if(storageService.Remove(parsedRequest.splitData[0])){
+							response.setOut("Delete failed",297);
+							Storage storage=sqlService.getStorage(parsedRequest.login,parsedRequest.password);
+							sqlService.ChangeSpaceFill(parsedRequest.login,parsedRequest.password,storage.storageFill-Long.getLong(parsedRequest.splitData[1]));
+						}
+						else
+							response.setOut("CreateDir successful",294);
+					}
+					break;
+				}
+
 				/*забыл парольчик*/
 				case 300:{
 					String[] loginAndPassword = sqlService.getPasswordAndLogin(parsedRequest.inStr);
@@ -208,6 +225,10 @@ public class Client implements Runnable {
 			splitData = pattern.split(inStr);
 		}
 		public void parseNewCatalog(){
+			Pattern pattern = Pattern.compile("//");
+			splitData = pattern.split(inStr);
+		}
+		public void parseDelete(){
 			Pattern pattern = Pattern.compile("//");
 			splitData = pattern.split(inStr);
 		}

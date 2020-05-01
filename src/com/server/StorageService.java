@@ -65,9 +65,6 @@ public class StorageService {
     }
 
 
-    void PrepareTransfer(InputStream in,long size,boolean isfile,String path) {
-
-    }
 
     public String GetSize()
     {
@@ -147,6 +144,15 @@ public class StorageService {
         }
         bis.close();
     }
+
+    public boolean Remove(String parh){
+        File file= new File(parh);
+        if(file.delete()){
+            return true;
+        }
+        else return false;
+    }
+
 
     public boolean OutTrans(BufferedOutputStream bos,String name) throws IOException {
         File file=new File(relRoot+name);
