@@ -114,6 +114,64 @@ public class Sql_service {
 		return loginAndPassword;
 	}
 
+	public long GetVersion(String login,String password){
+		try {
+			Connect();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+		}
+
+		query = "SELECT version FROM users"
+				+ " WHERE LOGIN = '" + login + "' AND "
+				+ "PASSWORD = '" + password + "';";
+		long version=-1;
+		try {
+			state = connection.createStatement();
+			result=state.executeQuery(query);
+			if(result.isBeforeFirst())
+			{
+				result.next();
+				version=(result.getLong("version"));
+			}
+			else
+			{
+				version=0;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally
+		{
+			CloseConnection();
+		}
+		return version;
+	}
+
+	public void UpdateVersion(String login,String password){
+		try {
+			Connect();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+		}
+		try {
+			query = "SELECT * FROM users"
+					+ " WHERE LOGIN = '" + login + "' AND "
+					+ "PASSWORD = '" + password + "';";
+			OpenChancels();
+			if(!result.isBeforeFirst()) {
+				query="INSERT users(version) VALUES ('"+1+"');";
+				state.executeUpdate(query);
+			}
+		}
+		catch(SQLException e1){
+			e1.printStackTrace();
+		}
+		finally {
+			CloseConnection();
+		}
+	}
 
 	public void ChangeSpaceFill(String login, String password,long newSize){
 		try {
