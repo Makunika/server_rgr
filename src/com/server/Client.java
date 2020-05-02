@@ -1,9 +1,6 @@
 package com.server;
 
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
@@ -63,7 +60,7 @@ public class Client implements Runnable {
 					else {
 						long storageFill = Long.parseLong(storageService.GetSize());
 						long storageAll = sqlService.getStorage(parsedRequest.getLogin(),parsedRequest.getPassword()).getStorageAll();
-                        response.setOut(storageAll + "/" + storageFill + "//" + storageService.GetTree(), 100);
+                        response.setOut(storageAll + "/" + storageFill + "//" + storageService.GetTree(), 101);
                         sqlService.ChangeSpaceFill(parsedRequest.getLogin(),parsedRequest.getPassword(),storageFill);
 					}
 					break;
@@ -141,9 +138,9 @@ public class Client implements Runnable {
 					} else{
 						parsedRequest.parseNewCatalog();
 						if(storageService.AddCatalog(parsedRequest.splitData[0],parsedRequest.splitData[1]))
-							response.setOut("CreateDir failed",297);
+							response.setOut("CreateDir successful",204);
 						else
-							response.setOut("CreateDir successful",294);
+							response.setOut("CreateDir failed",294);
 					}
 					break;
 				}
@@ -152,14 +149,14 @@ public class Client implements Runnable {
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
 					} else{
-						parsedRequest.parseDelete();
-						if(storageService.Remove(parsedRequest.splitData[0])){
-							response.setOut("Delete failed",297);
+						long size;
+						if((size = storageService.Remove(parsedRequest.inStr)) != -1){
+							response.setOut("Delete successful",205);
 							Storage storage=sqlService.getStorage(parsedRequest.login,parsedRequest.password);
-							sqlService.ChangeSpaceFill(parsedRequest.login,parsedRequest.password,storage.storageFill-Long.getLong(parsedRequest.splitData[1]));
+							sqlService.ChangeSpaceFill(parsedRequest.login,parsedRequest.password,storage.storageFill - size);
 						}
 						else
-							response.setOut("CreateDir successful",294);
+							response.setOut("Delete failed",295);
 					}
 					break;
 				}
@@ -184,8 +181,6 @@ public class Client implements Runnable {
 			//Конец обработки запроса
 			//Далее уже отправка
 			if (isResponsed) response.doFlush(out);
-
-			System.out.println("out " + ServerMain.numberOfOnline + " :" + response.out + "://" + response.code);
 		}
 		catch (IOException ex) {
 			ex.printStackTrace();
@@ -308,11 +303,11 @@ public class Client implements Runnable {
             String str = parsedRequest.getOut() + out + "://" + code;
 
             System.out.println("length out :" + str.length());
-            System.out.println("out : " + str);
             byte[] b = str.getBytes(StandardCharsets.UTF_8);
             outputStream.writeInt(b.length);
             outputStream.write(b);
             outputStream.flush();
+			System.out.println("out " + ServerMain.numberOfOnline + " :" + out + "://" + code);
         }
     }
 }

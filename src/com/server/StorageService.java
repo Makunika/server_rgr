@@ -79,6 +79,20 @@ public class StorageService {
         return Long.toString(storageFill);
     }
 
+    public String GetSize(String path)
+    {
+        Path path1 = Paths.get(relRoot + path);
+        try {
+            storageFill=Files.walk(path1,Integer.MAX_VALUE)
+                    .filter(p -> p.toFile().isFile())
+                    .mapToLong(p -> p.toFile().length())
+                    .sum();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Long.toString(storageFill);
+    }
+
 
     public String GetTree() {
         tree=new StringBuffer("");
@@ -145,28 +159,69 @@ public class StorageService {
         bis.close();
     }
 
-    public boolean Remove(String parh){
-        File file= new File(parh);
-        if(file.delete()){
-            return true;
+    public long Remove(String parh){
+        File file= new File(relRoot + parh);
+        long size;
+        if (file.exists())
+        {
+            if (file.isDirectory())
+            {
+                size = Long.parseLong(GetSize(parh));
+                recursiveDelete(file);
+                return size;
+            }
+            else
+            {
+                size = file.length();
+
+                if (file.delete())
+                    return size;
+                return -1;
+            }
         }
-        else return false;
+        else
+        {
+            return -1;
+        }
+    }
+
+    private void recursiveDelete(File file) {
+        // до конца рекурсивного цикла
+        if (!file.exists())
+            return;
+
+        //если это папка, то идем внутрь этой папки и вызываем рекурсивное удаление всего, что там есть
+        if (file.isDirectory()) {
+            for (File f : file.listFiles()) {
+                // рекурсивный вызов
+                recursiveDelete(f);
+            }
+        }
+        // вызываем метод delete() для удаления файлов и пустых(!) папок
+        file.delete();
+        System.out.println("Удаленный файл или папка: " + file.getAbsolutePath());
     }
 
 
     public boolean OutTrans(BufferedOutputStream bos,String name) throws IOException {
         File file=new File(relRoot+name);
         if(!file.exists()) return false;
+        boolean flag = false;
+        if (file.isDirectory())
+        {
+            file = new File(Zip(relRoot + name, name + ".zip"));
+            flag = true;
+        }
         BufferedInputStream oif = new BufferedInputStream(new FileInputStream(file));
         bos.write(longToBytes(file.length()));
         byte[] buffer = new byte[8192];
         int i = 0;
-        while ( (i = oif.read(buffer)) != -1)
-        {
-            bos.write(buffer,0,i);
+        while ((i = oif.read(buffer)) != -1) {
+            bos.write(buffer, 0, i);
         }
         bos.flush();
         oif.close();
+        //if (flag) file.delete();
         return true;
     }
 
@@ -180,7 +235,7 @@ public class StorageService {
      */
     public boolean AddCatalog(String path,String name) {
         try {
-            Files.createDirectory(Paths.get(path+"//" + name));
+            Files.createDirectory(Paths.get(relRoot + path+"\\" + name));
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -228,18 +283,18 @@ public class StorageService {
      * @throws IOException
      */
     public String Zip(String sourceDir, String zipFile) throws IOException {
-        FileOutputStream fout=new FileOutputStream(relRoot+"\\"+zipFile);
+        FileOutputStream fout=new FileOutputStream("!server\\"+zipFile);
         ZipOutputStream zout = new ZipOutputStream(fout);
 
         //шобы русские работали(не точно)
         zout.setEncoding("CP866");
 
-        File fileSource = new File(relRoot,sourceDir);
+        File fileSource = new File(sourceDir);
 
         addDirectory(zout,fileSource);
 
         zout.close();
-        return relRoot+SLASH+zipFile;
+        return "!server\\" + zipFile;
     }
 
     private void addDirectory(ZipOutputStream zout, File fileSource) throws IOException {
