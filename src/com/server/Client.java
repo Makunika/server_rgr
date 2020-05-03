@@ -65,6 +65,8 @@ public class Client implements Runnable {
 					}
 					break;
 				}
+
+				/*Загрузка на сервер*/
 				case 200: {
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
@@ -92,6 +94,7 @@ public class Client implements Runnable {
 					}
 					break;
 				}
+				/*Выгрузка с сервера*/
 				case 201:{
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);

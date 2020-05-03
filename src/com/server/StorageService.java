@@ -123,18 +123,20 @@ public class StorageService {
 
     public int prepairTrans(DataInputStream InputStream,String name,long size,boolean isPapka){
         if(isPapka){
-
-        }
-        else{
+            try {
+                fileATrans(InputStream,name);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
             try {
                 fileTrans(InputStream,name);
             } catch (IOException e) {
                 e.printStackTrace();
                 return 297;
             }
-            return 0;
         }
-        return -1;
+        return 0;
     }
     private void fileTrans(DataInputStream dataInputStream,String name) throws IOException {
         File file=new File(relRoot+name);
@@ -153,6 +155,33 @@ public class StorageService {
             sizel-= i;
         }
         bis.close();
+    }
+
+
+    private void fileATrans(DataInputStream dataInputStream,String name) throws IOException {
+        String aName=relRoot+System.currentTimeMillis()+".zip";
+        File file=new File(aName);
+        file.createNewFile();
+        FileOutputStream fos=new FileOutputStream(file);
+        BufferedInputStream bis = new BufferedInputStream(dataInputStream);
+
+        byte buffer[]=new byte[8008];
+        byte size[]=new byte[8];
+        bis.read(size);
+        long sizel=bytesToLong(size);
+
+        while (sizel > 0) {
+            int i = bis.read(buffer);
+            fos.write(buffer, 0, i);
+            sizel-= i;
+        }
+        bis.close();
+        try {
+            Unzip(aName,"!server\\"+relRoot);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        file.delete();
     }
 
     public long Remove(String parh){
