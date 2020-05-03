@@ -10,7 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.zip.Deflater;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -30,20 +32,13 @@ public class StorageService {
 
     public String newTrans[];
     public String inStr;
-/*
+
     public static void main(String[] args) throws Exception {
         StorageService test=new StorageService("maxim");
-       test.GetTree();
-        System.out.println(test.tree.toString());
-        Random random=new Random(1);
-        for(int i=0;i<10000;i++) {
-            byte[] a=new byte[8];
-            random.nextBytes(a);
-            System.out.println(bytesToLong(a));
-        }
-
+        test.Zip("!server\\test1","arch.zip");
+        test.Unzip("!server\\arch.zip","!server\\vasia");
     }
-*/
+
 
 
 
@@ -127,8 +122,9 @@ public class StorageService {
     }
 
     public int prepairTrans(DataInputStream InputStream,String name,long size,boolean isPapka){
-        //if(storage.storageFill+size>storage.storageAll) return 298;
-        if(isPapka){ }
+        if(isPapka){
+
+        }
         else{
             try {
                 fileTrans(InputStream,name);
@@ -285,7 +281,7 @@ public class StorageService {
     public String Zip(String sourceDir, String zipFile) throws IOException {
         FileOutputStream fout=new FileOutputStream("!server\\"+zipFile);
         ZipOutputStream zout = new ZipOutputStream(fout);
-
+        zout.setMethod(ZipOutputStream.STORED);
         //шобы русские работали(не точно)
         zout.setEncoding("CP866");
 
