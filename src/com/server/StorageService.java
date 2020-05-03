@@ -281,7 +281,7 @@ public class StorageService {
     public String Zip(String sourceDir, String zipFile) throws IOException {
         FileOutputStream fout=new FileOutputStream("!server\\"+zipFile);
         ZipOutputStream zout = new ZipOutputStream(fout);
-        zout.setLevel(0);
+        zout.setMethod(ZipOutputStream.STORED);
         //шобы русские работали(не точно)
         zout.setEncoding("CP866");
 
