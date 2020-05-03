@@ -291,25 +291,25 @@ public class StorageService {
 
         File fileSource = new File(sourceDir);
 
-        addDirectory(zout,fileSource);
+        addDirectory(zout,fileSource, "");
 
         zout.close();
         return "!server\\" + zipFile;
     }
 
-    private void addDirectory(ZipOutputStream zout, File fileSource) throws IOException {
+    private void addDirectory(ZipOutputStream zout, File fileSource, String Entry) throws IOException {
         File[] files = fileSource.listFiles();
         System.out.println("Добавление директории <" + fileSource.getName() + ">");
         for(int i=0;i<files.length;i++){
             if(files[i].isDirectory()){
-                addDirectory(zout,files[i]);
+                addDirectory(zout,files[i], !Entry.equals("") ? Entry + "\\" + files[i].getName() : files[i].getName());
                 continue;
             }
             System.out.println("Добавление файла <" + files[i].getName() + ">");
 
             FileInputStream fis =new FileInputStream(files[i]);
 
-            zout.putNextEntry(new ZipEntry(files[i].getPath()));
+            zout.putNextEntry(new ZipEntry(!Entry.equals("") ? Entry + "\\" + files[i].getName() : files[i].getName()));
 
             byte[] buffer = new byte[4048];
             int lenght;
