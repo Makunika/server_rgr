@@ -312,7 +312,7 @@ public class StorageService {
             zout.putNextEntry(new ZipEntry(!Entry.equals("") ? Entry + "\\" + files[i].getName() : files[i].getName()));
 
             byte[] buffer = new byte[4048];
-            int lenght;
+            int lenght = 0;
             while((lenght=fis.read(buffer))>0)
                 zout.write(buffer,0,lenght);
             zout.closeEntry();
