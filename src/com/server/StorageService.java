@@ -1,7 +1,6 @@
 package com.server;
 
 import org.apache.tools.zip.ZipEntry;
-import org.apache.tools.zip.ZipFile;
 import org.apache.tools.zip.ZipOutputStream;
 
 import java.io.*;
@@ -10,9 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.zip.Deflater;
+import java.util.zip.ZipInputStream;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -176,8 +173,9 @@ public class StorageService {
             sizel-= i;
         }
         bis.close();
+        fos.close();
         try {
-            Unzip(aName,"!server\\"+relRoot);
+            Unzip(aName,relRoot + name);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -316,6 +314,9 @@ public class StorageService {
 
         File fileSource = new File(sourceDir);
 
+        zout.setMethod(ZipOutputStream.DEFLATED);
+        zout.setLevel(0);
+
         addDirectory(zout,fileSource, "");
 
         zout.close();
@@ -330,7 +331,7 @@ public class StorageService {
                 addDirectory(zout,files[i], !Entry.equals("") ? Entry + "\\" + files[i].getName() : files[i].getName());
                 continue;
             }
-            System.out.println("Добавление файла <" + files[i].getName() + ">");
+            System.out.println("Добавление файла <" + (!Entry.equals("") ? Entry + "\\" + files[i].getName() : files[i].getName()) + ">");
 
             FileInputStream fis =new FileInputStream(files[i]);
 
@@ -368,32 +369,41 @@ public class StorageService {
      * @throws Exception
      */
     private void Unzip(String zipDir,String path) throws Exception {
-        ZipFile zipFile = new ZipFile(zipDir, "CP866");
-        Enumeration<?> entries = zipFile.getEntries();
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = (ZipEntry) entries.nextElement();
-            String entryName = path+SLASH+entry.getName();
-            if (entryName.endsWith(SLASH)) {
-                System.out.println("Создание директории <" + entryName + ">");
-                createFolder (entryName);
-                continue;
-            } else
-                checkFolder(entryName);
-            System.out.println("Чтение файла <" + entryName + ">");
-            InputStream  fis = (InputStream) zipFile.getInputStream(entry);
+        String fileZip = "src/main/resources/unzipTest/compressed.zip";
+        File destDir = new File("src/main/resources/unzipTest");
+        File pathF = new File(path);
+        if (!pathF.exists()) pathF.mkdir();
+        else return;
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(zipDir));
+        try (zis) {
+            java.util.zip.ZipEntry entry;
 
-            FileOutputStream fos = new FileOutputStream(entryName);
-            byte[] buffer = new byte[fis.available()];
-            // Считываем буфер
-            fis.read(buffer, 0, buffer.length);
-            // Записываем из буфера в файл
-            fos.write(buffer, 0, buffer.length);
-            fis.close();
-            fos.close();
+            while ((entry = zis.getNextEntry()) != null) {
+                File file = new File(pathF, entry.getName());
+
+                if (!file.toPath().normalize().startsWith(pathF.toPath())) {
+                    throw new IOException("Bad zip entry");
+                }
+
+                if (entry.isDirectory()) {
+                    file.mkdirs();
+                    continue;
+                }
+
+                byte[] buffer = new byte[4004];
+                file.getParentFile().mkdirs();
+                BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+                int count;
+
+                while ((count = zis.read(buffer)) != -1) {
+                    out.write(buffer, 0, count);
+                }
+
+                out.close();
+            }
         }
-        zipFile.close() ;
-        System.out.println("Zip файл разархивирован!");
     }
+
     public static long bytesToLong(byte[] bytes) {
         long result = 0;
         for (int i = 0; i < Long.BYTES; i++) {
