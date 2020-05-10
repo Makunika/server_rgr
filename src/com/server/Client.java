@@ -99,10 +99,17 @@ public class Client implements Runnable {
 					if (sqlService.authorization(parsedRequest.getLogin(),parsedRequest.getPassword()) != Codes.CodeSql.OkAuthorization) {
 						response.setOut("Bad request", 299);
 					} else{
-						response.setOut("ok file",201);
-						response.doFlush(out);
-						isResponsed = false;
-						storageService.OutTrans(new BufferedOutputStream(out),parsedRequest.inStr);
+						File file = new File("!server\\" + parsedRequest.login + parsedRequest.inStr);
+						if (!file.exists())
+						{
+							response.setOut("file not exist", 298);
+						}
+						else {
+							response.setOut("ok file", 201);
+							response.doFlush(out);
+							isResponsed = false;
+							storageService.OutTrans(new BufferedOutputStream(out), parsedRequest.inStr);
+						}
 					}
 					break;
 				}
