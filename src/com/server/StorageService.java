@@ -244,7 +244,7 @@ public class StorageService {
         }
         bos.flush();
         oif.close();
-        //if (flag) file.delete();
+        if (flag) file.delete();
         return true;
     }
 

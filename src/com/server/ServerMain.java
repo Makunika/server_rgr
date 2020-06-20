@@ -1,15 +1,11 @@
 package com.server;
 
-import java.net.*;
-import java.sql.*;
-import java.util.LinkedList;
-import java.io.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class ServerMain {
 	public static final int PORT1 = 24571;
-	public static final int PORT2 = 24570;
 	public static int numberOfOnline = 0;
 
 

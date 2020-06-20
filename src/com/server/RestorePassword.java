@@ -49,7 +49,6 @@ public class RestorePassword {
         } catch (UnsupportedEncodingException | MessagingException e) {
             e.printStackTrace();
         }
-
     }
 
     private static Message prepairMessage(Session session,String myAccount,String recipient, String login, String password) {
